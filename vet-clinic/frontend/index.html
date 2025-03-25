@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход и Регистрация</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h2>Регистрация</h2>
+    <form id="register-form">
+        <input type="text" id="username" placeholder="Логин" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Пароль" required>
+        <select id="role">
+            <option value="client">Клиент</option>
+            <option value="vet">Ветеринар</option>
+        </select>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+
+    <h2>Вход</h2>
+    <form id="login-form">
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Пароль" required>
+        <button type="submit">Войти</button>
+    </form>
+
+    <script src="app.js"></script>
+</body>
+</html>
