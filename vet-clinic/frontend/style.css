@@ -8,7 +8,10 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
 }
-
+.Reg_main {
+    color: #64C2C8;
+    text-decoration: none;
+}
 /* Контейнер для центрирования */
 .container {
     display: flex;
@@ -18,8 +21,8 @@ body {
     height: 90vh;
 }
 
-/* Карточка входа */
-.login-card {
+/* Общие стили карточек */
+.card, .login-card {
     background: white;
     padding: 3vw;
     border-radius: 1.5vw;
@@ -33,21 +36,23 @@ body {
     min-height: 60vh;
     position: relative;
 }
-/* колонкой назад и лого */
+
+/* Заголовок */
 .header {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Выравниваем элементы по высоте */
-    justify-content: center; /* Центрируем по горизонтали */
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    position: relative; /* Чтобы кнопка позиционировалась относительно этого контейнера */
+    position: relative;
 }
+
 /* Кнопка назад */
 .back-button {
     position: absolute;
     top: -1vw;
     left: -2vw;
-    transform: translateY(-50%); /* Центрирование кнопки по вертикали */
+    transform: translateY(-50%);
     background: none;
     border: none;
     font-size: 0.8vw;
@@ -57,23 +62,31 @@ body {
     border-radius: 50%;
     background-color: #D6F2F5;
 }
+
 .back-button span {
     display: inline-block;
-    transform: scaleY(2); /* Растягиваем только текст */
+    transform: scaleY(2);
 }
+
 /* Логотип */
 .logo {
     margin-top: -10%;
     width: 65%;
     height: auto;
 }
+.logo_main {
+    margin-top: 0%;
+    width: 100%;
+    height: auto;
+}
+/* Контент */
 .content {
-    width: 120%; /* Увеличиваем ширину */
-    text-align: center; /* Выравниваем текст */
+    width: 115%;
+    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: -10%;
+    margin-left: 5%;
 }
 
 /* Заголовок и текст */
@@ -81,9 +94,15 @@ h2 {
     margin-bottom: 0;
     font-size: 1.5vw;
 }
+
 p {
     margin-bottom: 4vh;
     font-size: 1vw;
+}
+
+.footer-text {
+    margin-top: 3vh;
+    color: #666;
 }
 
 /* Форма */
@@ -91,19 +110,19 @@ form {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 2vh;
-    flex-grow: 1;
 }
 
 /* Поля ввода */
-input {
-    width: 93%;
-    padding: 1.2vh;
-    border: 0.2vw solid #C4E9EB;
+input, select {
+    width: 90%;
+    padding: 1.5vh;
+    font-size: 2vh;
     border-radius: 3vw;
+    cursor: pointer;
+    margin-top: 1vw;
+    margin-bottom: 1vw;
+    border: 0.2vw solid #C4E9EB;
     background: #E5F7F8;
-    font-size: 1vw;
-    outline: none;
 }
 
 /* Метки */
@@ -113,22 +132,61 @@ label {
     font-size: 1vw;
 }
 
-/* Кнопка входа */
-.login-button {
+/* Чекбоксы */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1vh;
+    margin: 2vh 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+    font-size: 0.9vw;
+    font-weight: normal;
+}
+
+/* Кнопки */
+.First-button {
     width: 100%;
     background: #64C2C8;
     color: white;
     border: none;
     padding: 1.5vh;
-    font-size: 1.2vw;
+    font-size: 150%;
     border-radius: 3vw;
     cursor: pointer;
     margin-top: 0.3vw;
 }
 
+.main-button.secondary {
+    background: white;
+    color: #64C2C8;
+    border: 0.2vw solid #64C2C8;
+    margin-top: 1vh;
+}
+
+.buttons-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    margin: 3vh 0;
+}
+
+.info-text {
+    font-size: 0.9vw;
+    color: #666;
+    margin: 2vh 0;
+    text-align: left;
+}
+
 /* Адаптация для мобильных устройств */
 @media (max-width: 768px) {
-    .login-card {
+    .card, .login-card {
         width: 90vw;
         padding: 5vw;
         border-radius: 4vw;
@@ -143,36 +201,50 @@ label {
     }
     
     .logo {
-        font-size: 5vw;
-        margin-top: 0%;
+        margin-top: -3%;
+    }
+    .logo_main {
+        width: 100%;
+        margin-top: -3%;
     }
     .content {
         width: 100%;
         margin-left: 0%;
     }
+    
     h2 {
         font-size: 6vw;
     }
 
-    p {
+    p, .footer-text {
         font-size: 3vw;
         margin-bottom: 3vh;
     }
 
-    input {
+    input, select {
         width: 75vw;
         font-size: 3.5vw;
         padding: 2vh;
         border-radius: 6vw;
     }
 
-    .login-button {
-        font-size: 4vw;
+    .First-button {
+        margin-top: 8vw;
+        width: 83vw;
+        font-size: 7vw;
         padding: 2vh;
         border-radius: 6vw;
     }
+    
     label {
         font-size: 3.5vw;
     }
     
+    .checkbox-label {
+        font-size: 3vw;
+    }
+    
+    .info-text {
+        font-size: 2.8vw;
+    }
 }
