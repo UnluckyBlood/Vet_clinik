@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLove - Регистрация</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="header">
+                <a href="index.html"><button class="back-button"><span><</span></button></a>
+                <img src="img/logo.jpg" alt="" class="logo"></img>
+            </div>
+            <div class="content">
+                <h2>Создание аккаунта</h2>
+                <p>Шаг 1 из 3: Регистрация</p>
+                
+                <form>
+                    <label for="name">ФИО:</label>
+                    <input type="text" id="name" placeholder="Ваше имя:" required>
+                    
+                    <label for="method">Метод измерения:</label>
+                    <input type="email" id="email" placeholder="Ваш E-mail:" required>
+                    
+                    <label for="phone">Номер телефона:</label>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone"
+                        placeholder="+7 (XXX) XXX-XX-XX" 
+                        pattern="\+7\s?[\(]{0,1}[0-9]{3}[\)]{0,1}\s?\d{3}[-]{0,1}\d{2}[-]{0,1}\d{2}"
+                        required
+                    >
+                    
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox"> Оставь на обработку данных
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox"> Продолжать
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="login-button">Зарегистрироваться</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById('phone').addEventListener('input', function(e) {
+        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+        e.target.value = '+7' + (x[2] ? ' (' + x[2] : '') + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+    });
+    </script>
+</html>
