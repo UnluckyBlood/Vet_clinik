@@ -35,7 +35,7 @@
                     >
                     
                     <div class="checkbox-group">
-                        <label for="role">Роль пользователя:</label>
+                        <label for="role">fricks</label>
                         <select id="role" name="role" required>
                             <option value="" disabled selected>Выберите роль</option>
                             <option value="pet_owner">Владелец питомца</option>
@@ -55,79 +55,5 @@
             </div>
         </div>
     </div>
-    <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Сброс предыдущих ошибок
-            document.querySelectorAll('.error').forEach(el => {
-                el.classList.remove('error');
-            });
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.remove();
-            });
-        
-            // Проверка полей
-            const fields = [
-                { element: document.getElementById('name'), name: 'ФИО' },
-                { element: document.getElementById('email'), name: 'Email' },
-                { element: document.getElementById('phone'), name: 'Телефон' },
-                { element: document.getElementById('role'), name: 'Роль' },
-                { element: document.getElementById('consent'), name: 'Согласие', isCheckbox: true }
-            ];
-        
-            let isValid = true;
-        
-            fields.forEach(field => {
-                if (field.isCheckbox) {
-                    if (!field.element.checked) {
-                        markAsError(field.element, `Необходимо ${field.name.toLowerCase()}`);
-                        isValid = false;
-                    }
-                } else {
-                    if (!field.element.value.trim()) {
-                        markAsError(field.element, `Поле "${field.name}" обязательно`);
-                        isValid = false;
-                    } else if (field.element.id === 'phone' && !field.element.checkValidity()) {
-                        markAsError(field.element, 'Неверный формат телефона');
-                        isValid = false;
-                    } else if (field.element.id === 'email' && !field.element.checkValidity()) {
-                        markAsError(field.element, 'Неверный формат email');
-                        isValid = false;
-                    }
-                }
-            });
-        
-            if (!isValid) {
-                return;
-            }
-        
-            // Перенаправление
-            const role = document.getElementById('role').value;
-            const pages = {
-                'pet_owner': 'owner_vet_reg_2.html',
-                'vet': 'vet_reg_2.html',
-                'admin': 'admin_reg_2.html'
-            };
-        
-            if (pages[role]) {
-                window.location.href = pages[role];
-            } else {
-                alert('Ошибка: неизвестная роль');
-            }
-        });
-        
-        function markAsError(element, message) {
-            element.classList.add('error');
-            const errorMsg = document.createElement('div');
-            errorMsg.className = 'error-message';
-            errorMsg.textContent = message;
-            errorMsg.style.color = 'red';
-            errorMsg.style.fontSize = '0.8em';
-            errorMsg.style.marginTop = '0.3em';
-            element.parentNode.insertBefore(errorMsg, element.nextSibling);
-        }
-        </script>
 </body>
-
 </html>
