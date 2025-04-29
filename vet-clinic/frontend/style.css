@@ -5,11 +5,11 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
+    margin: 0vh;
     font-family: Arial, sans-serif;
 }
 .Reg_main {
-    color: #64C2C8;
+    color: #4CD6D6;
     text-decoration: none;
 }
 /* Контейнер для центрирования */
@@ -28,12 +28,13 @@ body {
     width: 20vw;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     text-align: center;
     min-height: 60vh;
     max-height: 80vh;
     position: relative;
+    
 }
 
 /* Заголовок */
@@ -65,8 +66,11 @@ body {
 .back-button span {
     display: inline-block;
     transform: scaleY(2);
-}
 
+}
+span{
+    font-size: 1.7vh;
+}
 /* Логотип */
 .logo {
     margin-top: -10%;
@@ -86,21 +90,34 @@ body {
     flex-direction: column;
     align-items: center;
     margin-left: 5%;
+    margin-top: 0.1vh;
 }
 
 /* Заголовок и текст */
 h2 {
-    margin-bottom: 0;
-    font-size: 1.5vw;
+    margin-bottom: 0vh;
+    margin-top: 2vh;
+    font-size: 3vh;
 }
-
+.first_page_h2{
+    margin-bottom: 0vh;
+    margin-top: 0vh;
+    font-size: 3vh;
+    color: #48BABA;
+}
 p {
-    margin-bottom: 4vh;
-    font-size: 1vw;
+    font-size: 2vh;
+    padding-top: 0.1vh;
+    margin-top: 0.1vh;
 }
-
+.first_page_p{
+    font-size: 2vh;
+    padding-top: 0.1vh;
+    margin-top: 0.1vh;
+    color: #68E9E9;
+}
 .footer-text {
-    margin-top: 3vh;
+    margin-top: 1vh;
     color: #666;
 }
 
@@ -109,6 +126,7 @@ form {
     width: 100%;
     display: flex;
     flex-direction: column;
+    text-align: left;
 }
 
 /* Поля ввода */
@@ -126,7 +144,7 @@ input, select {
 .input_register{
     width: 90%;
     padding: 1.5vh;
-    font-size: 2vh;
+    font-size: 1.7vh;
     border-radius: 3vw;
     cursor: pointer;
     margin-top: 0.3vw;
@@ -136,9 +154,11 @@ input, select {
 }
 /* Метки */
 label {
+    text-align: left;
     font-weight: bold;
     align-self: flex-start;
     font-size: 1vw;
+    margin-top: 1vh;
 }
 
 /* Чекбоксы */
@@ -146,13 +166,14 @@ label {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 45vh;
 }
 
 .checkbox-label {
     display: flex;
     align-items: center;
     gap: 1vw;
-    font-size: 0.9vw;
+    font-size: 1vh;
     font-weight: normal;
 }
 
@@ -163,7 +184,7 @@ label {
     color: white;
     border: none;
     padding: 1.5vh;
-    font-size: 150%;
+    font-size: 3vh;
     border-radius: 3vw;
     cursor: pointer;
     margin-top: 0.3vw;
@@ -238,7 +259,7 @@ select {
     content: "✓";
     position: absolute;
     color: white;
-    font-size: 1vw;
+    font-size: 1.5vw;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -256,15 +277,54 @@ select {
 
 .input_register.error {
     border: 1px solid red;
+    font-size: 1vh;
 }
 
 #consent.error + span {
     color: red;
 }
+/* Модальное окно */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 3vw;
+    border-radius: 1.5vw;
+    width: 60vw;
+    max-width: 500px;
+    text-align: center;
+}
+
+.modal-content p {
+    margin-bottom: 2vh;
+    font-size: 1.2vw;
+}
+.two-in-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+}
+
+.half-width {
+    width: 48%;  
+}
+
 /* Адаптация для мобильных устройств */
 @media (max-width: 768px) {
     .card, .login-card {
-        width: 90vw;
+        width: 85vw;
         padding: 5vw;
         border-radius: 4vw;
         min-height: 75vh;
@@ -287,6 +347,7 @@ select {
     .content {
         width: 100%;
         margin-left: 0%;
+        margin-top: -2vh !important;
     }
     
     h2 {
@@ -301,8 +362,8 @@ select {
     input, select {
         width: 75vw;
         font-size: 3.5vw;
-        padding: 2vh;
         border-radius: 6vw;
+        
     }
 
     .First-button {
@@ -315,6 +376,7 @@ select {
     
     label {
         font-size: 3.5vw;
+        margin-bottom: 3vw;
     }
     
     .checkbox-label {
@@ -324,4 +386,21 @@ select {
     .info-text {
         font-size: 2.8vw;
     }
+
+.checkbox-label input[type="checkbox"]:checked::after {
+    content: "✓";
+    position: absolute;
+    color: white;
+    font-size: 5vw;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.modal-content {
+    width: 80vw;
+    padding: 5vw;
+}
+.modal-content p {
+    font-size: 3.5vw;
+}
 }
