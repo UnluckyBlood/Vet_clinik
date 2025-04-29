@@ -166,7 +166,7 @@ label {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 45vh;
+    width: 40vh;
 }
 
 .checkbox-label {
