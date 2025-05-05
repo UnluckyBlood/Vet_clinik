@@ -56,6 +56,13 @@
         </div>
     </div>
     <script>
+        // Добавляем маску телефона
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+            e.target.value = !x[2] ? '+7' : '+7 (' + x[2] + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+        });
+        
+        // Ваш существующий обработчик формы с модификацией для телефона
         document.querySelector('form').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -88,9 +95,13 @@
                     if (!field.element.value.trim()) {
                         markAsError(field.element, `Поле "${field.name}" обязательно`);
                         isValid = false;
-                    } else if (field.element.id === 'phone' && !field.element.checkValidity()) {
-                        markAsError(field.element, 'Неверный формат телефона');
-                        isValid = false;
+                    } else if (field.element.id === 'phone') {
+                        // Модифицированная проверка телефона
+                        const phoneValue = field.element.value.replace(/\D/g, '');
+                        if (phoneValue.length !== 11) {
+                            markAsError(field.element, 'Телефон должен содержать 11 цифр');
+                            isValid = false;
+                        }
                     } else if (field.element.id === 'email' && !field.element.checkValidity()) {
                         markAsError(field.element, 'Неверный формат email');
                         isValid = false;
