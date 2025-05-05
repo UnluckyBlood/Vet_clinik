@@ -1,0 +1,1 @@
+Copyright 2011 The Philosopher Project Authors (lemonad@jovanny.ru)
