@@ -104,8 +104,8 @@ body {
 }
 
 .photo-preview {
-    width: 100vh;
-    height: 100vh;
+    width: 10vh;
+    height: 10vh;
     border-radius: 50%;
     object-fit: cover;
     display: none;
@@ -120,7 +120,7 @@ body {
     margin-top: 10%;
     flex-wrap: wrap; /* Разрешаем перенос элементов */
     width: 100%;
-    gap: 8vh;
+    gap: 20px;
 }
 .profile-nav_add_picture {
     display: flex;
@@ -130,6 +130,7 @@ body {
     width: 100%;
     margin: 20px 0; /* Отступы сверху и снизу */
 }
+
 .nav-button {
     display: flex;
     flex-direction: column;
@@ -524,8 +525,75 @@ option:hover {
 .half-width {
     width: 48%;  
 }
+.readonly-field {
+    width: 100%;
+    margin-bottom: 2vh;
+    text-align: left;
+}
 
-/* Адаптация для мобильных устройств */
+.readonly-field label {
+    font-weight: bold;
+    font-size: 1.7vh;
+    margin-bottom: 0.5vh;
+    display: block;
+}
+
+.field-value {
+    background: #E5F7F8;
+    border: 0.2vw solid #C4E9EB;
+    border-radius: 3vw;
+    padding: 1.5vh;
+    font-size: 1.7vh;
+    color: #333;
+    margin-bottom: 0.5vh;
+}
+
+.field-note {
+    font-size: 1.5vh;
+    color: #666;
+    font-style: italic;
+}
+.form-split {
+    display: flex;
+    gap: 4vh;
+    width: 100%;
+    margin-top: 0;
+}
+
+.form-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.form-right {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.two-in-row {
+    display: flex;
+    gap: 7.2vw;
+    margin: 1vh 0;
+}
+
+.half-width {
+    flex: 1;
+    min-width: 0;
+}
+.First-button.secondary {
+    background: white;
+    color: #64C2C8;
+    border: 0.2vw solid #64C2C8;
+}
+
+.buttons-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+}
+
 @media (max-width: 768px) {
     .card, .login-card {
         width: 85vw;
@@ -571,7 +639,7 @@ option:hover {
     }
 
     .First-button {
-        margin-top: 8vw;
+        margin-top: 1vh;
         width: 83vw;
         font-size: 7vw;
         padding: 2vh;
@@ -606,5 +674,30 @@ option:hover {
 }
 .modal-content p {
     font-size: 3.5vw;
+}
+
+#photoPreview{
+    width: 6vh;
+    height: 6vh;
+}
+span{
+    font-size: 1.3vh;
+}
+.reset-btn {
+    right: 8px;
+    width: 1.5vh;
+    height: 1.5vh;
+    border-radius: 50%;
+    background: #000000;
+    color: white;
+    border: none;
+    font-size: 1vh;
+    font-weight: bold;
+    cursor: pointer;
+    display: none;
+    z-index: 10;
+    padding: 0;
+    line-height: 1.5vh;
+    box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.2);
 }
 }
