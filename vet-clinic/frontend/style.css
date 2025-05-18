@@ -104,23 +104,23 @@ body {
 }
 
 .photo-preview {
-    width: 100px;
-    height: 100px;
+    width: 100vh;
+    height: 100vh;
     border-radius: 50%;
     object-fit: cover;
     display: none;
 }
 
 #photoIcon {
-    width: 50px;
-    height: 50px;
+    width: 7vh;
+    height: 7vh;
 }
 .profile-nav {
     display: flex;
     margin-top: 10%;
     flex-wrap: wrap; /* Разрешаем перенос элементов */
     width: 100%;
-    gap: 20px;
+    gap: 8vh;
 }
 .profile-nav_add_picture {
     display: flex;
@@ -150,8 +150,8 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 .nav-button img {
-    width: 7vh;
-    height: 7vh;
+    width: 10vh;
+    height: 10vh;
     border-radius: 50%;
 }
 .logout {
