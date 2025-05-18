@@ -10,15 +10,23 @@
     <div class="container">
         <div class="card">
             <div class="header">
-                <a href="home_user.html"><button class="back-button"><span><</span></button></a>
+                <a href="animals_user.html"><button class="back-button"><span><</span></button></a>
                 <img src="img/logo.svg" alt="" class="logo"></img>
             </div>
-            <div class="profile-nav">
-                <a href="profile_user.html" class="nav-button">
-                    <img src="../frontend/img/photo_add.svg" alt="Добавить фотографию">
-                    <span>Добавить фото</span>
-                </a>
+            <div class="profile-nav_add_picture">
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <label for="fileInput" class="nav-button photo-placeholder">
+                    <div class="photo-wrapper">
+                        <div class="photo-container">
+                            <img id="photoPreview" class="photo-preview" alt="Превью фото">
+                            <img id="photoIcon" src="../frontend/img/photo_add.svg" alt="Добавить фотографию">
+                        </div>
+                        <button id="resetPhotoBtn" class="reset-btn" title="Удалить фото">×</button>
+                    </div>
+                    <span>Добавить</span>
+                </label>
             </div>
+
 
                 <form id="petForm">
                     <label for="petName">Имя питомца:</label>
@@ -62,6 +70,61 @@
         </div>
     </div>
     <script>
+      // Обработчик сброса фото
+    document.getElementById('resetPhotoBtn').addEventListener('click', function(e) {
+        e.stopPropagation(); // Предотвращаем открытие файлового диалога
+        
+        // Сбрасываем значение input file
+        document.getElementById('fileInput').value = '';
+        
+        // Скрываем превью и показываем иконку
+        document.getElementById('photoPreview').style.display = 'none';
+        document.getElementById('photoIcon').style.display = 'block';
+        
+        // Скрываем кнопку сброса
+        this.style.display = 'none';
+        
+        // Удаляем фото из localStorage
+        localStorage.removeItem('petPhoto');
+    });
+
+    // Модифицируем обработчик загрузки фото, чтобы показывать кнопку сброса
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                const preview = document.getElementById('photoPreview');
+                const icon = document.getElementById('photoIcon');
+                const resetBtn = document.getElementById('resetPhotoBtn');
+                
+                preview.src = event.target.result;
+                preview.style.display = 'block';
+                icon.style.display = 'none';
+                resetBtn.style.display = 'block';
+                
+                localStorage.setItem('petPhoto', event.target.result);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    });
+
+// При загрузке страницы также показываем кнопку сброса, если есть фото
+window.addEventListener('DOMContentLoaded', function() {
+    const savedPhoto = localStorage.getItem('petPhoto');
+    if (savedPhoto) {
+        const preview = document.getElementById('photoPreview');
+        const icon = document.getElementById('photoIcon');
+        const resetBtn = document.getElementById('resetPhotoBtn');
+        
+        preview.src = savedPhoto;
+        preview.style.display = 'block';
+        icon.style.display = 'none';
+        resetBtn.style.display = 'block';
+    }
+});
         document.getElementById('petForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const requiredFields = [
