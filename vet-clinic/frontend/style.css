@@ -45,15 +45,18 @@ body {
     justify-content: center;
     align-items: center;
 }
+
 .profile-nav {
     display: flex;
     margin-top: 10%;
-    flex-direction: column;
+    flex-wrap: wrap; /* Разрешаем перенос элементов */
     width: 100%;
     gap: 20px;
 }
+
 .nav-button {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-decoration: none;
@@ -62,7 +65,7 @@ body {
     border-radius: 3vh;
     transition: all 0.3s ease;
     background: #f8f9fa;
-    width: 100%;
+    width: calc(50% - 10px); /* Ширина с учетом gap */
     box-sizing: border-box;
 }
 .nav-button:hover {
@@ -71,9 +74,9 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 .nav-button img {
-    width: 5vh;
-    height: 5vh;
-    margin-right: 3vh;
+    width: 7vh;
+    height: 7vh;
+    border-radius: 50%;
 }
 .logout {
     margin-top: 20px;
@@ -230,7 +233,20 @@ input:hover, select:hover {
     transition: all 0.3s ease;
     outline: none;
 }
-.input_register:focus {
+.input_register_fix{
+    width: 100%;
+    padding: 1.5vh;
+    font-size: 1.7vh;
+    border-radius: 3vw;
+    cursor: pointer;
+    margin-top: 0.3vw;
+    margin-bottom: 0.3vw;
+    border: 0.2vw solid #C4E9EB;
+    background: #E5F7F8;
+    transition: all 0.3s ease;
+    outline: none;
+}
+.input_register:focus, .input_register_fix:focus {
     border-color: #64C2C8;
     box-shadow: 0 0 0 2px rgba(100, 194, 200, 0.2);
     background: #FFFFFF;
