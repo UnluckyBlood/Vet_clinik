@@ -11,6 +11,26 @@ body {
 .Reg_main {
     color: #4CD6D6;
     text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+}
+.Reg_main:hover {
+    color: #3ab8b8;
+}
+
+.Reg_main::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -2px;
+    left: 0;
+    background-color: #3ab8b8;
+    transition: width 0.3s ease;
+}
+
+.Reg_main:hover::after {
+    width: 100%;
 }
 /* Контейнер для центрирования */
 .container {
@@ -140,6 +160,17 @@ input, select {
     margin-bottom: 1vw;
     border: 0.2vw solid #C4E9EB;
     background: #E5F7F8;
+    transition: all 0.3s ease;
+    outline: none;
+}
+input:focus, select:focus {
+    border-color: #64C2C8;
+    box-shadow: 0 0 0 2px rgba(100, 194, 200, 0.2);
+    background: #FFFFFF;
+}
+
+input:hover, select:hover {
+    border-color: #9BD5D8;
 }
 .input_register{
     width: 90%;
@@ -151,6 +182,17 @@ input, select {
     margin-bottom: 0.3vw;
     border: 0.2vw solid #C4E9EB;
     background: #E5F7F8;
+    transition: all 0.3s ease;
+    outline: none;
+}
+.input_register:focus {
+    border-color: #64C2C8;
+    box-shadow: 0 0 0 2px rgba(100, 194, 200, 0.2);
+    background: #FFFFFF;
+}
+
+.input_register:hover {
+    border-color: #9BD5D8;
 }
 /* Метки */
 label {
@@ -188,8 +230,17 @@ label {
     border-radius: 3vw;
     cursor: pointer;
     margin-top: 0.3vw;
+    transition: all 0.3s ease;
+    transform: scale(1);
+}
+.First-button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(100, 194, 200, 0.4);
 }
 
+.First-button:active {
+    transform: scale(0.98);
+}
 .main-button.secondary {
     background: white;
     color: #64C2C8;
@@ -223,8 +274,24 @@ select {
     appearance: none;
     background-repeat: no-repeat;
     background-position: right 1vw center;
+    transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
 }
 
+option {
+    padding: 1vh;
+    background: #E5F7F8;
+    color: #333;
+}
+
+option:checked {
+    background: #64C2C8;
+    color: white;
+}
+
+option:hover {
+    background: #9BD5D8 !important;
+    color: white;
+}
 /* Блок согласия */
 .consent-block {
     margin: 2vh 0;
