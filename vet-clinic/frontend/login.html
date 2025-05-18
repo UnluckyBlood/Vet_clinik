@@ -15,7 +15,7 @@
                 <div class="content">
                     <h2>Здравствуйте!</h2>
                     <p>Войдите в систему, чтобы продолжить</p>
-                    <form>
+                    <form id="loginForm">
                         <label for="email">Ваш E-mail:</label>
                         <input type="email" id="email" placeholder="Введите ваш e-mail" required>
                         
@@ -25,6 +25,30 @@
                         <button type="submit" class="First-button">Войти</button>
                     </form>
                 </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            let redirectPage = 'home_user.html'; // Страница по умолчанию
+            
+            if(email === 'zwampir915@gmail.com') {
+                redirectPage = 'home_user.html';
+            } else if(email === 'wampir915@gmail.com') {
+                redirectPage = 'home_admin.html';
+            } else if(email === 'unluckyblood@mail.ru') {
+                redirectPage = 'home_vet.html';
+            }
+
+            window.location.href = redirectPage;
+            
+            // Для реального использования нужно добавить проверку пароля 
+            // и серверную аутентификацию!
+        });
+    </script>
 </body>
 </html>
