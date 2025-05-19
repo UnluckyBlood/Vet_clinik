@@ -29,30 +29,8 @@
                             <label for="breed">Порода:</label>
                             <input class="input_register" type="text" id="breed" placeholder="Введите породу" required>
                             
-                            <div class="two-in-row">
-                                <div class="half-width">
-                            <label for="petGender">Пол:</label>
-                            <select id="petGender" class="input_register" required>
-                                <option value="" disabled selected>Выберите пол</option>
-                                <option value="male">Мужской</option>
-                                <option value="female">Женский</option>
-                            </select>
-                                </div>
-                                <div class="half-width">
-                                    <label for="age">Возраст:</label>
-                                    <select id="petAge" class="input_register_fix" required>
-                                    <option value="" disabled selected>Выберите возраст</option>
-                                    <option value="1">До 1 года</option>
-                                    <option value="2">1-3 года</option>
-                                    <option value="3">3-5 лет</option>
-                                    <option value="4">5+ лет</option>
-                                </select>
-                                </div>
-                            </div>
                             
-                            <label for="passport">Паспорт:</label>
-                            <input class="input_register" type="text" id="passport" placeholder="Номер паспорта">
-                        </div>
+                         </div>   
                         <div class="form-right">
                             <div class="profile-nav_add_picture">
                                 <input type="file" id="fileInput" accept="image/*" style="display: none;">
@@ -69,11 +47,34 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="two-in-row">
+                                <div class="half-width">
+                                    <label for="petGender">Пол:</label>
+                                    <select id="petGender" class="input_register" required>
+                                        <option value="" disabled selected>Выберите пол</option>
+                                        <option value="male">Мужской</option>
+                                        <option value="female">Женский</option>
+                                    </select>
+                                </div>
+                                    <div class="half-width">
+                                            <label for="age">Возраст:</label>
+                                            <select id="petAge" class="input_register_fix" required>
+                                            <option value="" disabled selected>Выберите возраст</option>
+                                            <option value="1">До 1 года</option>
+                                            <option value="2">1-3 года</option>
+                                            <option value="3">3-5 лет</option>
+                                            <option value="4">5+ лет</option>
+                                        </select>
+                                    </div>
+                                </div>
+                    
+                            
+                    <label for="passport">Паспорт:</label>
+                    <input class="input_register" type="text" id="passport" placeholder="Номер паспорта">
                     <div class="buttons-container">
                         <button type="button" class="First-button secondary">Открыть журнал</button>
                         <button type="submit" class="First-button">Редактировать</button>
-                    </div>
+                    
                 </form>
             </div>
         </div>
