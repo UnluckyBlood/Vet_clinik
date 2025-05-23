@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLove - Данные лицензии</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="header">
+                <a href="home_vet.html"><button class="back-button"><span><</span></button></a>
+                <img src="img/logo.jpg" alt="" class="logo"></img>
+            </div>
+            <div class="content">
+                <h2>Профиль</h2>
+                
+                <form id="licenseForm">
+                    <div class="checkbox-group">
+                        <label for="fullname">ФИО:</label>
+                        <input type="text" id="fullname" class="input_register" placeholder="Введите ваше ФИО" required>
+                    </div>
+                    <div class="checkbox-group">
+                        <label for="emailConfirm">Сменить почту:</label>
+                        <input type="email" id="emailConfirm" class="input_register" placeholder="Ваш E-mail" required>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label for="password">Заменить пароль:</label>
+                        <input type="password" id="password" class="input_register" placeholder="Не менее 8 символов" required minlength="8">
+                    </div>
+                    <div class="checkbox-group">
+                        <label for="licenseNumber">Номер лицензии:</label>
+                        <input type="text" id="licenseNumber" class="input_register" placeholder="Введите только цифры" required>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label for="issueDate">Дата выдачи:</label>
+                        <input type="date" id="issueDate" class="input_register" required>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label for="issuedBy">Кем выдана:</label>
+                        <input type="text" id="issuedBy" class="input_register" placeholder="Орган, выдавший лицензию" required>
+                    </div>
+                    
+                    <button type="submit" class="First-button">Редактировать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('licenseNumber').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
+        document.getElementById('licenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const requiredFields = [
+                { id: 'fullname', name: 'ФИО' },
+                { id: 'licenseNumber', name: 'Номер лицензии' },
+                { id: 'issueDate', name: 'Дата выдачи' },
+                { id: 'issuedBy', name: 'Кем выдана' },
+                { id: 'dataConsent', name: 'Согласие', isCheckbox: true }
+            ];
+            
+            let isValid = true;
+            
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (field.isCheckbox) {
+                    if (!element.checked) {
+                        markAsError(element, `Необходимо ${field.name.toLowerCase()}`);
+                        isValid = false;
+                    }
+                } else {
+                    if (!element.value.trim()) {
+                        markAsError(element, `Поле "${field.name}" обязательно`);
+                        isValid = false;
+                    } else if (field.id === 'licenseNumber' && !/^\d+$/.test(element.value)) {
+                        markAsError(element, 'Номер лицензии должен содержать только цифры');
+                        isValid = false;
+                    }
+                }
+            });
+            
+            if (isValid) {
+                window.location.href = 'vet_reg_3.html';
+            }
+        });
+        
+        function markAsError(element, message) {
+            element.classList.add('error');
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'error-message';
+            errorMsg.textContent = message;
+            errorMsg.style.color = 'red';
+            errorMsg.style.fontSize = '0.8em';
+            errorMsg.style.marginTop = '0.3em';
+            element.parentNode.appendChild(errorMsg);
+        }
+    </script>
+</body>
+</html>
