@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLove - Добавление приема</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="header">
+                <a href="home_admin.html"><button class="back-button"><span><</span></button></a>
+                <img src="img/logo.jpg" alt="Логотип" class="logo">
+            </div>
+            <div class="content">
+                <h2>Добавление приема</h2>
+                
+                <form id="test">
+                    <div class="field-value">{id}</div>
+                    <label for="vrach">ФИО врача:</label>
+                    <div class="field-value">{Андрей Игнатьевич Вязев}</div>
+                    <label for="vrach">Телефон:</label>
+                    <div class="field-value">{+7(995)445-13-12}</div>
+                    <label for="vrach">E-mail:</label>
+                    <div class="field-value">{hesima@gmail.com}</div>
+                    <label for="vrach">Номер лицензии:</label>
+                    <div class="field-value">{31124hgds34}</div>
+                    <label for="vrach">Дата выдачи:</label>
+                    <div class="field-value">{25.02.2014}</div>
+                    <label for="vrach">Кем выдана:</label>
+                    <div class="field-value">{УФМС ЖИВ ПОКА ПЁС}</div>
+                    <div class="two-in-row">
+                        <div class="half-width">
+                            <button type="submit" name="action" value="approve" class="First-button">Одобрить</button>
+                        </div>
+                        <div class="half-width">
+                            <button type="submit" name="action" value="reject" class="First-button">Отклонить</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Функция показа уведомления
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Обработчик формы
+        document.getElementById('test').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Определяем какая кнопка была нажата
+            const action = document.activeElement.value;
+            
+            if (action === 'approve') {
+                showNotification('✅ Заявка одобрена!');
+            } else if (action === 'reject') {
+                showNotification('❌ Заявка отклонена!', 'error');
+            }
+
+            // Перенаправление через 3 секунды
+            setTimeout(() => {
+                window.location.href = 'home_admin.html';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

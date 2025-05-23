@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLove - Мои пациенты</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <a href="animals_user.html"><button class="back-button"><span><</span></button></a>
+                <img src="img/logo.svg" alt="Логотип" class="logo">
+                <h2 class="first_page_h2">Мои пациенты</h2>
+            </div>
+            
+            <div class="content patients-content">
+                <div class="search-container">
+                    <input type="text" 
+                           placeholder="Введите идентификатор пациента" 
+                           class="input_register search-input"
+                           id="searchField">
+                    
+                    <a href="add_patient.html" class="add-patient-btn">
+                        <img src="img/plus_pets.svg" alt="Добавить пациента">
+                    </a>
+                </div>
+                
+                <div class="patients-list" id="patientsList">
+                    <a href="patient_barsik.html" class="patient-item">
+                        <h3 class="patient-name">Барсик</h3>
+                    </a>
+                    <a href="patient_barsik.html" class="patient-item">
+                        <h3 class="patient-name">Тайота</h3>
+                    </a>
+                    <a href="patient_barsik.html" class="patient-item">
+                        <h3 class="patient-name">Фриксик</h3>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchField').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const patients = document.querySelectorAll('.patient-item');
+            
+            patients.forEach(patient => {
+                const name = patient.querySelector('.patient-name').textContent.toLowerCase();
+                patient.style.display = name.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLove - Добавление приема</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="header">
+                <a href="jurnal_pacients.html"><button class="back-button"><span><</span></button></a>
+                <img src="img/logo.jpg" alt="Логотип" class="logo">
+            </div>
+            <div class="content">
+                <h2>Добавление приема</h2>
+                
+                <form id="register">
+                    <label for="vrach">ФИО врача:</label>
+                    <div class="field-value">{Андрей Игнатьевич Вязев}</div>
+                    
+                    <label for="address">Адрес приема:</label>
+                    <input class="input_register" type="text" id="address" placeholder="Адрес приема" required>
+                    
+                    <label for="date">Дата приема:</label>
+                    <input class="input_register" type="date" id="date" required>
+
+                    <div class="checkbox-group">
+                        <label for="role">Вид приема:</label>
+                        <select id="role" name="role" required>
+                            <option value="" disabled selected>Выберите тип</option>
+                            <option value="osmotr">Осмотр</option>
+                            <option value="privivka">Прививка</option>
+                            <option value="vaction">Вакцинация</option>
+                        </select>
+                    </div>
+
+                    <div id="dynamicFields"></div>
+
+                        <label for="pdfUpload" class="Reg_main secondary">
+                            <img src="img/pdf_download.svg" alt="PDF">
+                            <span id="downloadFile">Загрузить PDF</span>
+                            <input type="file" id="pdfUpload" accept=".pdf" hidden>
+                            <span id="fileName">Файл не выбран</span>
+                        </label>
+                    
+                    <button type="submit" class="First-button">Создать запись</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомление -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const roleSelect = document.getElementById('role');
+        const dynamicFields = document.getElementById('dynamicFields');
+        const notification = document.getElementById('notification');
+
+        // Шаблоны полей
+        const fieldTemplates = {
+            osmotr: `
+                <label for="diagnostics" class="label secondary">Диагностика:</label>
+                <input class="input_register secondary" type="text" id="diagnostics" required>
+                <label for="treatment" class="label secondary">Лечение:</label>
+                <input class="input_register secondary" type="text" id="treatment" required>
+            `,
+            privivka: `
+                <label for="vaccine_type" class="label secondary">Тип прививки:</label>
+                <input class="input_register secondary" type="text" id="vaccine_type" required>
+                <label for="reg_number" class="label secondary">Рег. номер:</label>
+                <input class="input_register secondary" type="text" id="reg_number" required>
+            `,
+            vaction: `
+                <label for="vaccine_name" class="label secondary">Вид вакцины:</label>
+                <input class="input_register secondary" type="text" id="vaccine_name" required>
+                <label for="batch_number" class="label secondary">Номер партии:</label>
+                <input class="input_register secondary" type="text" id="batch_number" required>
+            `
+        };
+
+        // Обработчики событий
+        roleSelect.addEventListener('change', () => {
+            dynamicFields.innerHTML = fieldTemplates[roleSelect.value] || '';
+        });
+
+        document.getElementById('pdfUpload').addEventListener('change', function() {
+            document.getElementById('fileName').textContent = this.files[0]?.name || 'Файл не выбран';
+            document.getElementById('downloadFile').textContent = null;
+
+        });
+
+        // Показать уведомление
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Обработчик отправки формы
+        document.getElementById('register').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Валидация полей
+            let isValid = true;
+            const requiredFields = document.querySelectorAll('[required]');
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('error');
+                }
+            });
+
+            if (!isValid) {
+                showNotification('⚠️ Заполните все обязательные поля', 'error');
+                return;
+            }
+
+            // Показать успешное уведомление
+            showNotification('✅ Запись успешно создана!');
+            
+            // Сброс формы через 1 секунду
+            setTimeout(() => {
+                this.reset();
+                dynamicFields.innerHTML = '';
+                document.getElementById('fileName').textContent = 'Файл не выбран';
+                document.getElementById('downloadFile').textContent = 'Загрузить PDF';
+
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -5,6 +5,7 @@
     font-style: italic;
     font-display: swap;
 }
+
 /* Основные стили */
 body {
     background-color: #D6F2F5;
@@ -15,22 +16,59 @@ body {
     margin: 0vh;
     font-family: Arial, sans-serif;
 }
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.card, .login-card {
+    background: white;
+    padding: 3vw;
+    border-radius: 1.5vw;
+    box-shadow: 0 0.4vw 1vw rgba(0, 0, 0, 0.1);
+    width: 20vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    min-height: 60vh;
+    max-height: 90vh;
+    margin-top: calc((95vh / max(90vh, 100%)) / 5); 
+    margin-bottom: 1vh;
+    position: relative;
+    
+}
+
 .Reg_main {
     color: #4CD6D6;
     text-decoration: none;
     transition: all 0.2s ease;
     position: relative;
 }
+.Reg_main.secondary{
+    max-height: 3vh;
+    top: -1vw;
+}
 .Reg_main:hover {
     color: #3ab8b8;
 }
-
+.Reg_main.secondary::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0.1vw;
+    bottom: -1vw;
+    left: 0;
+    background-color: #3ab8b8;
+    transition: width 0.3s ease;
+}
 .Reg_main::after {
     content: '';
     position: absolute;
     width: 0;
-    height: 1px;
-    bottom: -2px;
+    height: 0.15vw;
+    bottom: -0.3vw;
     left: 0;
     background-color: #3ab8b8;
     transition: width 0.3s ease;
@@ -40,11 +78,7 @@ body {
     width: 100%;
 }
 /* Контейнер для центрирования */
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+
 .photo-placeholder {
     display: flex;
     flex-direction: column;
@@ -151,22 +185,7 @@ body {
     background: #ffd6d6;
 }
 /* Общие стили карточек */
-.card, .login-card {
-    background: white;
-    padding: 3vw;
-    border-radius: 1.5vw;
-    box-shadow: 0 0.4vw 1vw rgba(0, 0, 0, 0.1);
-    width: 20vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    text-align: center;
-    min-height: 60vh;
-    max-height: 80vh;
-    position: relative;
-    
-}
+
 
 /* Заголовок */
 .header {
@@ -357,6 +376,19 @@ label {
     transition: all 0.3s ease;
     transform: scale(1);
 }
+.First-button.tertiary{
+    width: 105%;
+    background: #64C2C8;
+    color: white;
+    border: none;
+    padding: 1.5vh;
+    font-size: 3vh;
+    border-radius: 3vw;
+    cursor: pointer;
+    margin-top: 0.3vw;
+    transition: all 0.3s ease;
+    transform: scale(1);
+}
 .First-button:hover {
     transform: scale(1.02);
     box-shadow: 0 2px 8px rgba(100, 194, 200, 0.4);
@@ -373,7 +405,7 @@ label {
 }
 
 .buttons-container {
-    width: 100%;
+    width: 100vh;
     display: flex;
     flex-direction: column;
     gap: 1vh;
@@ -583,13 +615,157 @@ option:hover {
     flex-direction: column;
     gap: 1vh;
 }
+/* Search Container */
+.search-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5vh;
+    width: 90%;
+    margin: 2vh 0;
+}
 
+.search-input {
+    width: 100%;
+    margin: 0;
+}
+
+.add-patient-btn {
+    display: flex;
+    align-items: center;
+    padding: 2vh;
+    background: #64C2C8;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.add-patient-btn:hover {
+    background: #48BABA;
+    transform: rotate(90deg);
+}
+
+.add-patient-btn img {
+    width: 3vh;
+    height: 3vh;
+    filter: brightness(0) invert(1);
+}
+
+.patients-list {
+    width: 90%;
+    height: 50vh;
+    border-top: 1px solid #C4E9EB;
+    padding: 2vh 0 0;
+    margin-top: 2vh;
+    overflow-y: auto;
+}
+
+.patient-item {
+    display: block;
+    background: #E5F7F8;
+    border-radius: 2vh;
+    padding: 2vh;
+    margin-bottom: 2vh;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.patient-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: #D6F2F5;
+}
+
+/* Text Elements */
+.patient-name {
+    color: #48BABA;
+    margin: 0 0 0.5vh;
+    font-size: 2.2vh;
+}
+
+.breed-info {
+    color: #666;
+    margin: 0;
+    font-size: 1.5vh;
+    line-height: 1.8;
+}
+
+.back-nav {
+    margin-top: auto;
+    justify-content: center;
+}
+#dynamicFields {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    margin: 2vh 0;
+}
+
+#dynamicFields label {
+    animation: slideIn 0.3s ease forwards;
+    opacity: 0;
+}
+
+#dynamicFields input {
+    animation: slideIn 0.3s ease forwards;
+    opacity: 0;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+label.secondary{
+    margin-top: 0.3vh;
+}
+.input_register.secondary {
+    transition: all 0.3s ease;
+    width: 90%;
+    padding: 1vh;
+    font-size: 1.7vh;
+    border-radius: 3vw;
+    cursor: pointer;
+    margin-top: 0.3vw;
+    margin-bottom: 0.3vw;
+    border: 0.2vw solid #C4E9EB;
+    background: #E5F7F8;
+    transition: all 0.3s ease;
+    outline: none;
+}
+.notification {
+    position: fixed;
+    top: 20px;
+    right: -300px;
+    background: #4CAF50;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    opacity: 0;
+}
+
+.notification.show {
+    right: 20px;
+    opacity: 1;
+}
+
+.notification.error {
+    background: #f44336;
+}
 @media (max-width: 768px) {
     .card, .login-card {
         width: 85vw;
         padding: 5vw;
         border-radius: 4vw;
         min-height: 75vh;
+        max-height: 90vh;
     }
     
     .back-button {
@@ -627,7 +803,20 @@ option:hover {
         border-radius: 6vw;
         
     }
-
+    .Reg_main.secondary{
+        max-height: 3vh;
+        top: -3vw;
+    }
+    .Reg_main.secondary::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0.1vw;
+    bottom: 0;
+    left: 0;
+    background-color: #3ab8b8;
+    transition: width 0.3s ease;
+}
     .First-button {
         margin-top: 1vh;
         width: 83vw;
@@ -639,6 +828,11 @@ option:hover {
     label {
         font-size: 3.5vw;
         margin-bottom: 3vw;
+        margin-top: 0.2vw
+    }
+    label.secondary {
+        font-size: 3.5vw;
+        margin-bottom: 1vw;
         margin-top: 0.2vw
     }
     
