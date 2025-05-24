@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLove - Завершение регистрации</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="header">
+                <a href="vet_reg_2.html"><button class="back-button"><span><</span></button></a>
+                <img src="img/logo.jpg" alt="" class="logo"></img>
+            </div>
+            <div class="content">
+                <h2>Создание аккаунта</h2>
+                <p>Шаг 3 из 3: Регистрации</p>
+                
+                <form id="finalForm">
+                    <div class="checkbox-group">
+                        <label for="emailConfirm">Подтверждение почты:</label>
+                        <input type="email" id="emailConfirm" class="input_register" placeholder="Ваш E-mail" required>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label for="password">Придумайте пароль:</label>
+                        <input type="password" id="password" class="input_register" placeholder="Не менее 8 символов" required minlength="8">
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label for="passwordConfirm">Повторите пароль:</label>
+                        <input type="password" id="passwordConfirm" class="input_register" placeholder="Повторите пароль" required>
+                    </div>
+                    
+                    <button type="submit" class="First-button">Завершить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+document.getElementById('finalForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Получаем данные из sessionStorage
+    const regData = JSON.parse(sessionStorage.getItem('regData'));
+    const licenseData = JSON.parse(sessionStorage.getItem('licenseData'));
+
+    if (!regData || !licenseData) {
+        alert('Данные сессии утеряны!');
+        return;
+    }
+
+    // Проверка email
+    const emailConfirm = document.getElementById('emailConfirm').value;
+    if (emailConfirm !== regData.email) {
+        alert('Email не совпадает!');
+        return;
+    }
+
+    // Проверка пароля
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('passwordConfirm').value;
+    if (password !== passwordConfirm) {
+        alert('Пароли не совпадают!');
+        return;
+    }
+
+    // Добавляем пароль к данным
+    regData.password = password;
+
+    try {
+        // Отправка всех данных на сервер
+        const response = await fetch('http://localhost:5000/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...regData,
+                licenseData // Добавляем данные лицензии
+            })
+        });
+
+        if (response.ok) {
+            sessionStorage.removeItem('regData');
+            sessionStorage.removeItem('licenseData');
+            alert('ОЖИДАЙТЕ ПОДТВЕРЖДЕНИЕ ЛИЦЕНЗИИ. ПОДТВЕРЖДЕНИЕ ЗАЙМЕТ НЕ БОЛЬШЕ ДВУХ ДНЕЙ.');
+            window.location.href = 'index.html';
+        } else {
+            alert('Ошибка регистрации');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+    }
+});
+    </script>
+</body>
+</html>
