@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetLove - Мои пациенты</title>
+    <title>PetLove - Проверка лицензий</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -24,65 +24,49 @@
                 </div>
                 
                 <div class="patients-list" id="patientsList">
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">32124a3232</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">sdadsa123213</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">2s1332s1s2</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">2dwawdxz9</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">123gffgfx1s2</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">xwadxaws7</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">fxbcxbcs1</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">sy54435s2</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">v453v3465</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">2s1332s1s2</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">tvtqv4343t</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">b58664653b</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">432c2c136c</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">7v564v7654</h3>
-                    </a>
-                    <a href="proverka_licension.html" class="patient-item">
-                        <h3 class="patient-name">v764v67576v45</h3>
-                    </a>
+
+
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('searchField').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const patients = document.querySelectorAll('.patient-item');
-            
-            patients.forEach(patient => {
-                const name = patient.querySelector('.patient-name').textContent.toLowerCase();
-                patient.style.display = name.includes(searchTerm) ? 'block' : 'none';
-            });
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/unapproved-vets');
+                const vets = await response.json();
+
+                const list = document.getElementById('patientsList');
+                list.innerHTML = '';
+
+                vets.forEach(vet => {
+                    const item = document.createElement('a');
+                    item.href = `proverka_licension.html?id=${vet.id}`;
+                    item.className = 'patient-item';
+                    
+                    const title = document.createElement('h3');
+                    title.className = 'patient-name';
+                    title.textContent = vet.id;
+                    
+                    item.appendChild(title);
+                    list.appendChild(item);
+                });
+
+                // Поиск
+                document.getElementById('searchField').addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const patients = document.querySelectorAll('.patient-item');
+                    
+                    patients.forEach(patient => {
+                        const name = patient.querySelector('.patient-name').textContent.toLowerCase();
+                        patient.style.display = name.includes(searchTerm) ? 'block' : 'none';
+                    });
+                });
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
         });
     </script>
 </body>

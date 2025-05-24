@@ -1,17 +1,20 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const pool = require('./config/db');
-const userRoutes = require('./routes/users');
 const path = require('path');
 const app = express();
-app.use(express.static(path.join(__dirname, '../client/src/pages')));
+
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, '../client/src/pages')));
 
+// Роутеры
+const userRoutes = require('./routes/users');
 app.use('/api', userRoutes);
 
+// Запуск сервера
 const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Сервер запущен на порту ${PORT}`);
 });

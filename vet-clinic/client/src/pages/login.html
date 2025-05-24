@@ -10,8 +10,8 @@
     <div class="container">
         <div class="login-card">
             <div class="header">
-            <a href="index.html"><button class="back-button"><span><</span></button></a>
-            <img src="img/logo.jpg" alt="" class="logo"></img>
+                <a href="index.html"><button class="back-button"><span><</span></button></a>
+                <img src="img/logo.jpg" alt="" class="logo"></img>
                 <div class="content">
                     <h2>Здравствуйте!</h2>
                     <p>Войдите в систему, чтобы продолжить</p>
@@ -30,25 +30,39 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            let redirectPage = 'home_user.html'; // Страница по умолчанию
-            
-            if(email === 'zwampir915@gmail.com') {
-                redirectPage = 'home_user.html';
-            } else if(email === 'wampir915@gmail.com') {
-                redirectPage = 'home_admin.html';
-            } else if(email === 'unluckyblood@mail.ru') {
-                redirectPage = 'home_vet.html';
-            }
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const password = document.getElementById('password').value;
 
-            window.location.href = redirectPage;
-            
-            // Для реального использования нужно добавить проверку пароля 
-            // и серверную аутентификацию!
-        });
+    try {
+            const response = await fetch('http://localhost:5000/api/login', { // Было: /api/auto/login
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+        // Если ответ не JSON, выводим текст ошибки
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || "Ошибка авторизации");
+        }
+
+        // Перенаправление
+        const roleMapping = {
+            'admin': 'home_admin.html',
+            'vet': 'home_vet.html',
+            'pet_owner': 'home_user.html'
+        };
+        
+        window.location.href = roleMapping[data.role];
+
+    } catch (error) {
+        alert("Ошибка: проверьте email и пароль");
+        console.error("Детали:", error);
+    }
+});
     </script>
 </body>
 </html>

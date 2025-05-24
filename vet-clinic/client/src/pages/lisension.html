@@ -3,37 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetLove - Добавление приема</title>
+    <title>PetLove - Проверка лицензии</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <div class="login-card">
             <div class="header">
-                <a href="home_vet.html"><button class="back-button"><span><</span></button></a>
+                <a href="home_admin.html"><button class="back-button"><span><</span></button></a>
                 <img src="img/logo.jpg" alt="Логотип" class="logo">
             </div>
             <div class="content">
-                <h2>Лицензия</h2>
+                <h2>Данные лицензии</h2>
                 
-                <form id="test">
-                    <div class="field-value">{id}</div>
-                    <label for="vrach">ФИО врача:</label>
-                    <div class="field-value">{Андрей Игнатьевич Вязев}</div>
-                    <label for="vrach">Телефон:</label>
-                    <div class="field-value">{+7(995)445-13-12}</div>
-                    <label for="vrach">E-mail:</label>
-                    <div class="field-value">{hesima@gmail.com}</div>
-                    <label for="vrach">Номер лицензии:</label>
-                    <div class="field-value">{31124hgds34}</div>
-                    <label for="vrach">Дата выдачи:</label>
-                    <div class="field-value">{25.02.2014}</div>
-                    <label for="vrach">Кем выдана:</label>
-                    <div class="field-value">{УФМС ЖИВ ПОКА ПЁС}</div>
+                <form id="vetForm">
+                    <div class="field-value" id="vetId"></div>
+                    <label>ФИО врача:</label>
+                    <div class="field-value" id="fullname"></div>
+                    <label>Телефон:</label>
+                    <div class="field-value" id="phone"></div>
+                    <label>E-mail:</label>
+                    <div class="field-value" id="email"></div>
+                    <label>Номер лицензии:</label>
+                    <div class="field-value" id="licenseNumber"></div>
+                    <label>Дата выдачи:</label>
+                    <div class="field-value" id="issueDate"></div>
+                    <label>Кем выдана:</label>
+                    <div class="field-value" id="issuedBy"></div>
+                    
+                    <div class="two-in-row">
+                        <div class="half-width">
+                            <button type="submit" name="action" value="approve" class="First-button">Одобрить</button>
+                        </div>
+                        <div class="half-width">
+                            <button type="submit" name="action" value="reject" class="First-button">Отклонить</button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
     <div id="notification" class="notification"></div>
+
+    <script>
+        // Уведомления
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        // Загрузка данных
+        document.addEventListener('DOMContentLoaded', async () => {
+            const vetId = new URLSearchParams(window.location.search).get('id');
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/vet/${vetId}`);
+                const vet = await response.json();
+
+                document.getElementById('vetId').textContent = vet.id;
+                document.getElementById('fullname').textContent = vet.fullname;
+                document.getElementById('phone').textContent = vet.phone;
+                document.getElementById('email').textContent = vet.email;
+                document.getElementById('licenseNumber').textContent = vet.license_number;
+                document.getElementById('issueDate').textContent = vet.issue_date;
+                document.getElementById('issuedBy').textContent = vet.issued_by;
+
+            } catch (error) {
+                showNotification('Ошибка загрузки данных', 'error');
+            }
+        });
+
+        // Обработка кнопок
+        document.getElementById('vetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const vetId = new URLSearchParams(window.location.search).get('id');
+            const action = document.activeElement.value;
+
+            try {
+                // 1. Формируем URL
+                const endpoint = action === 'approve' 
+                    ? `approve-vet/${vetId}` 
+                    : `reject-vet/${vetId}`;
+
+                // 2. Отправляем запрос
+                const response = await fetch(`http://localhost:5000/api/${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // 3. Обрабатываем ответ
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Неизвестная ошибка");
+                }
+
+                // 4. Уведомление и перенаправление
+                showNotification(
+                    action === 'approve' 
+                        ? '✅ Ветеринар одобрен!' 
+                        : '❌ Ветеринар отклонен!',
+                    action === 'approve' ? 'success' : 'error'
+                );
+
+                setTimeout(() => {
+                    window.location.href = 'home_admin.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showNotification(error.message, 'error');
+            }
+        });
+    </script>
 </body>
 </html>
