@@ -151,6 +151,29 @@ body {
 .pets-container {
     display: contents; /* Элементы будут участвовать в общей сетке */
 }
+
+
+.patient-info {
+    flex-grow: 1;
+    text-decoration: none;
+    color: #333;
+}
+a {
+    text-decoration: none;
+}
+.delete-btn {
+    background: #2b9593;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.delete-btn:hover {
+    background: #000000;
+}
 #petsList {
     display: flex;
     flex-wrap: wrap;

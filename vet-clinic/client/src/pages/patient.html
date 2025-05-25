@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLove - Профиль питомца</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <a href="slayre.html"><button class="back-button"><span><</span></button></a>
+                <img src="img/logo.svg" alt="Логотип" class="logo">
+            </div>
+            <div class="content">
+                <h2 id="petName">Профиль питомца</h2>
+                <form id="petForm">
+                    <div class="readonly-field">
+                        <label>Уникальный идентификатор:</label>
+                        <div class="field-value" id="petId"></div>
+                        <div class="field-note">*Идентификатор для связи с врачом</div>
+                    </div>
+                    
+                    <div class="form-split">
+                        <div class="form-left">
+                            <!-- Основная информация -->
+                            <label for="name">Кличка:</label>
+                            <input class="input_register" 
+                                   type="text" 
+                                   id="name" 
+                                   readonly>
+                            
+                            <label for="breed">Порода:</label>
+                            <input class="input_register" 
+                                   type="text" 
+                                   id="breed" 
+                                   readonly>
+                            
+                            <label for="age">Возраст:</label>
+                            <select id="age" class="input_register_fix" disabled>
+                                <option value="1">До 1 года</option>
+                                <option value="2">1-3 года</option>
+                                <option value="3">3-5 лет</option>
+                                <option value="4">5+ лет</option>
+                            </select>
+                            
+                            <label for="gender">Пол:</label>
+                            <select id="gender" class="input_register" disabled>
+                                <option value="male">Мужской</option>
+                                <option value="female">Женский</option>
+                            </select>
+                            
+                            <label for="passport">Паспорт:</label>
+                            <input class="input_register" 
+                                   type="text" 
+                                   id="passport" 
+                                   readonly>
+                        </div>
+                        
+                        <div class="form-right">
+                            <!-- Фото питомца -->
+                            <div class="profile-nav_add_picture">
+                                <div class="photo-container">
+                                    <img id="photoPreview" 
+                                         class="photo-preview" 
+                                         alt="Фото питомца"
+                                         style="width: 100%; height: auto;"
+                                         onerror="this.onerror=null; this.src='img/default-pet.jpg'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="buttons-container">
+                        <a href="jurnal_pacients.html">
+                            <button type="button" class="First-button secondary">Журнал наблюдений</button>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadPetData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const petId = urlParams.get('pet_id');
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/pet/${petId}`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных');
+                const pet = await response.json();
+
+                // Заполнение данных
+                document.getElementById('petId').textContent = `ID: ${pet.id}`;
+                document.getElementById('petName').textContent = pet.name;
+                document.getElementById('name').value = pet.name;
+                document.getElementById('breed').value = pet.breed;
+                document.getElementById('age').value = pet.age;
+                document.getElementById('gender').value = pet.gender;
+                document.getElementById('passport').value = pet.passport || 'не указан';
+
+                // Загрузка фото
+                const photoPreview = document.getElementById('photoPreview');
+                if (pet.photo_url) {
+                    photoPreview.src = pet.photo_url;
+                    photoPreview.style.display = 'block';
+                } else {
+                    photoPreview.src = 'img/default-pet.jpg';
+                }
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось загрузить данные питомца');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadPetData);
+    </script>
+</body>
+</html>

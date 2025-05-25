@@ -28,30 +28,79 @@
                 </div>
                 
                 <div class="patients-list" id="patientsList">
-                    <a href="patient_barsik.html" class="patient-item">
-                        <h3 class="patient-name">Барсик</h3>
-                    </a>
-                    <a href="patient_barsik.html" class="patient-item">
-                        <h3 class="patient-name">Тайота</h3>
-                    </a>
-                    <a href="patient_barsik.html" class="patient-item">
-                        <h3 class="patient-name">Фриксик</h3>
-                    </a>
+                    <!-- Пациенты будут загружены динамически -->
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Функция удаления пациента
+        async function deletePatient(petId) {
+            if (!confirm("Вы уверены, что хотите удалить пациента?")) return;
+            
+            try {
+                const vetId = localStorage.getItem('userId');
+                const response = await fetch(
+                    `http://localhost:5000/api/vet-patients/${vetId}/${petId}`,
+                    { method: 'DELETE' }
+                );
+
+                if (!response.ok) throw new Error('Ошибка удаления');
+                loadPatients(); // Перезагружаем список
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert(error.message);
+            }
+        }
+
+        // Функция загрузки пациентов
+        async function loadPatients() {
+            const vetId = localStorage.getItem('userId');
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/vet-patients/${vetId}`);
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                
+                const patients = await response.json();
+                const container = document.getElementById('patientsList');
+                container.innerHTML = '';
+
+                patients.forEach(patient => {
+                    const patientElement = document.createElement('div');
+                    patientElement.className = 'patient-item';
+                    patientElement.innerHTML = `
+                        <a href="patient.html?pet_id=${patient.id}" class="patient-link">
+                            <h3 class="patient-name">${patient.name}</h3>
+                            <p class="patient-id">ID: ${patient.id}</p>
+                        </a>
+                        <button class="delete-btn" onclick="deletePatient(${patient.id})">
+                            ✕
+                        </button>
+                    `;
+                    container.appendChild(patientElement);
+                });
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось загрузить пациентов');
+            }
+        }
+
+        // Поиск пациентов
         document.getElementById('searchField').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const patients = document.querySelectorAll('.patient-item');
             
             patients.forEach(patient => {
                 const name = patient.querySelector('.patient-name').textContent.toLowerCase();
-                patient.style.display = name.includes(searchTerm) ? 'block' : 'none';
+                patient.style.display = name.includes(searchTerm) ? 'flex' : 'none';
             });
         });
+
+        // Загрузка при старте
+        window.addEventListener('DOMContentLoaded', loadPatients);
     </script>
 </body>
 </html>

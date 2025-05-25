@@ -334,4 +334,60 @@ router.put('/pet/:pet_id', upload.single('photo'), async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+// Добавление пациента ветеринару
+router.post('/add-patient', async (req, res) => {
+    const { vet_id, pet_id } = req.body;
+    
+    try {
+        // Проверяем существование питомца
+        const petCheck = await pool.query(
+            'SELECT * FROM pets WHERE id = $1',
+            [pet_id]
+        );
+        
+        if (petCheck.rows.length === 0) {
+            return res.status(404).json({ error: "Питомец не найден" });
+        }
+
+        // Добавляем связь
+        await pool.query(
+            'INSERT INTO vet_patients (vet_id, pet_id) VALUES ($1, $2)',
+            [vet_id, pet_id]
+        );
+        
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Получение пациентов ветеринара
+router.get('/vet-patients/:vet_id', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT p.id, p.name, p.photo_url 
+            FROM vet_patients vp
+            JOIN pets p ON vp.pet_id = p.id
+            WHERE vp.vet_id = $1
+        `, [req.params.vet_id]);
+        
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+router.delete('/vet-patients/:vet_id/:pet_id', async (req, res) => {
+    const { vet_id, pet_id } = req.params;
+    
+    try {
+        await pool.query(
+            `DELETE FROM vet_patients 
+             WHERE vet_id = $1 AND pet_id = $2`,
+            [vet_id, pet_id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 module.exports = router;
