@@ -183,6 +183,86 @@ router.post('/reject-vet/:id', async (req, res) => {
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
+// Эндпоинт для получения данных пользователя с валидацией ID
+router.get('/user/:id', async (req, res) => {
+    const { id } = req.params;
+    
+    // Проверяем, что ID является числом
+    if (isNaN(id)) {
+        return res.status(400).json({ error: "Некорректный ID пользователя" });
+    }
 
+    try {
+        const result = await pool.query(
+            `SELECT id, name, email, phone, role 
+             FROM users 
+             WHERE id = $1`,
+            [parseInt(id)] // Явное преобразование к числу
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Пользователь не найден" });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error("Ошибка получения данных:", err);
+        res.status(500).json({ error: "Ошибка сервера" });
+    }
+});
+router.put('/update-user/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, email, phone, licenseData } = req.body;
+
+    // Проверка ID
+    if (isNaN(id)) {
+        return res.status(400).json({ error: "Некорректный ID пользователя" });
+    }
+
+    try {
+        // Проверка уникальности email (исключая текущего пользователя)
+        const emailCheck = await pool.query(
+            "SELECT * FROM users WHERE email = $1 AND id != $2",
+            [email, id]
+        );
+        if (emailCheck.rows.length > 0) {
+            return res.status(400).json({ error: "Email уже используется" });
+        }
+
+        // Обновление данных пользователя
+        const userResult = await pool.query(
+            `UPDATE users 
+             SET name = $1, email = $2, phone = $3 
+             WHERE id = $4 
+             RETURNING *`,
+            [name, email, phone, id]
+        );
+
+        // Если пользователь - ветеринар и есть данные лицензии
+        if (licenseData) {
+            await pool.query(
+                `UPDATE vet_licenses 
+                 SET fullname = $1, license_number = $2, issue_date = $3, issued_by = $4 
+                 WHERE user_id = $5`,
+                [
+                    licenseData.fullname,
+                    licenseData.licenseNumber,
+                    licenseData.issueDate,
+                    licenseData.issuedBy,
+                    id
+                ]
+            );
+        }
+
+        res.json({ 
+            success: true,
+            user: userResult.rows[0]
+        });
+
+    } catch (err) {
+        console.error("Ошибка обновления:", err);
+        res.status(500).json({ error: "Ошибка сервера" });
+    }
+});
 
 module.exports = router;

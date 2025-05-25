@@ -55,7 +55,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             'vet': 'home_vet.html',
             'pet_owner': 'home_user.html'
         };
-        
+        localStorage.setItem('userId', String(data.id));
         window.location.href = roleMapping[data.role];
 
     } catch (error) {

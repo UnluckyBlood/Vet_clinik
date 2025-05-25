@@ -16,18 +16,17 @@
             <div class="content">
                 <h2>Мой профиль</h2>
                 
-                <form id="register">
+                <form id="profileForm">
                     <label for="name">Ваше имя:</label>
-                    <input class="input_register" type="text" id="name" placeholder="Ваше имя:" required>
+                    <input class="input_register" type="text" id="name" required>
                     
                     <label for="email">Ваш E-mail:</label>
-                    <input class="input_register" type="email" id="email" placeholder="Ваш E-mail:" required>
+                    <input class="input_register" type="email" id="email" required>
                     
                     <label for="phone">Номер телефона:</label>
                     <input class="input_register" 
                         type="tel" 
                         id="phone" 
-                        name="phone"
                         placeholder="+7 (XXX) XXX-XX-XX" 
                         pattern="\+7\s?[\(]{0,1}[0-9]{3}[\)]{0,1}\s?\d{3}[-]{0,1}\d{2}[-]{0,1}\d{2}"
                         required
@@ -37,88 +36,90 @@
             </div>
         </div>
     </div>
-    <script>
-        // Фейковые данные
-        const fakeUserData = {
-            name: "Дима",
-            email: "zwampir915@gmail.com",
-            phone: "+7 (996) 590-28-62"
-        };
 
-        // Загрузка данных при открытии страницы
-        function loadUserData() {
-            const savedData = JSON.parse(localStorage.getItem('userProfile'));
-            const userData = savedData || fakeUserData;
-            
+<script>
+    // Загрузка данных пользователя и лицензии (для ветеринаров)
+    async function loadUserData() {
+        const userId = localStorage.getItem('userId');
+        
+        try {
+            // Загрузка основных данных
+            const userResponse = await fetch(`http://localhost:5000/api/user/${userId}`);
+            const userData = await userResponse.json();
+
             document.getElementById('name').value = userData.name;
             document.getElementById('email').value = userData.email;
             document.getElementById('phone').value = userData.phone;
+
+            // Если пользователь - ветеринар, загружаем лицензию
+            if (userData.role === 'vet') {
+                const licenseResponse = await fetch(`http://localhost:5000/api/vet/${userId}`);
+                const licenseData = await licenseResponse.json();
+
+                document.getElementById('fullname').value = licenseData.fullname;
+                document.getElementById('licenseNumber').value = licenseData.license_number;
+                document.getElementById('issueDate').value = licenseData.issue_date;
+                document.getElementById('issuedBy').value = licenseData.issued_by;
+            }
+
+        } catch (error) {
+            alert('Ошибка загрузки данных');
         }
+    }
 
-        // Инициализация при загрузке страницы
-        window.addEventListener('DOMContentLoaded', () => {
-            loadUserData();
-            
-            // Маска для телефона
-            document.getElementById('phone').addEventListener('input', function(e) {
-                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-                e.target.value = !x[2] ? '+7' : '+7 (' + x[2] + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
-            });
-        });
+    // Отправка обновленных данных
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = localStorage.getItem('userId');
 
-        // Обработчик отправки формы
-        document.getElementById('register').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Валидация
-            const fields = [
-                { element: document.getElementById('name'), name: 'ФИО' },
-                { element: document.getElementById('email'), name: 'Email' },
-                { element: document.getElementById('phone'), name: 'Телефон' }
-            ];
+        const updatedData = {
+            name: document.getElementById('name').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            phone: document.getElementById('phone').value.replace(/\D/g, '')
+        };
 
-            let isValid = true;
-            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-            document.querySelectorAll('.error-message').forEach(el => el.remove());
-
-            fields.forEach(field => {
-                if (!field.element.value.trim()) {
-                    markAsError(field.element, `Поле "${field.name}" обязательно`);
-                    isValid = false;
-                }
-                
-                if (field.element.id === 'phone') {
-                    const phoneValue = field.element.value.replace(/\D/g, '');
-                    if (phoneValue.length !== 11) {
-                        markAsError(field.element, 'Телефон должен содержать 11 цифр');
-                        isValid = false;
-                    }
-                }
-            });
-
-            if (!isValid) return;
-
-            // Сохранение в localStorage
-            const userData = {
-                name: document.getElementById('name').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                phone: document.getElementById('phone').value
+        // Если ветеринар, добавляем данные лицензии
+        const role = localStorage.getItem('userRole'); // Предполагаем, что роль сохранена при входе
+        if (role === 'vet') {
+            updatedData.licenseData = {
+                fullname: document.getElementById('fullname').value.trim(),
+                licenseNumber: document.getElementById('licenseNumber').value.trim(),
+                issueDate: document.getElementById('issueDate').value,
+                issuedBy: document.getElementById('issuedBy').value.trim()
             };
-            
-            localStorage.setItem('userProfile', JSON.stringify(userData));
-            alert('Данные успешно сохранены!');
-        });
-
-        function markAsError(element, message) {
-            element.classList.add('error');
-            const errorMsg = document.createElement('div');
-            errorMsg.className = 'error-message';
-            errorMsg.textContent = message;
-            errorMsg.style.color = 'red';
-            errorMsg.style.fontSize = '0.8em';
-            errorMsg.style.marginTop = '0.3em';
-            element.parentNode.insertBefore(errorMsg, element.nextSibling);
         }
-    </script>
+
+        // Валидация телефона
+        if (updatedData.phone.length !== 11) {
+            alert('Телефон должен содержать 11 цифр');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/update-user/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Ошибка обновления");
+            }
+
+            alert('Данные успешно обновлены!');
+            window.location.reload();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    // Инициализация
+    window.addEventListener('DOMContentLoaded', () => {
+        loadUserData();
+        // Маска для телефона (код из предыдущего примера)
+    });
+</script>
 </body>
 </html>
