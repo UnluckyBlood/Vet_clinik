@@ -54,11 +54,9 @@
             if (Array.isArray(appointments)) {
                 appointments.forEach(appointment => {
                     const item = document.createElement('div');
-                    item.className = 'patient-item';
+                    item.className = 'patient-item'; // Используем тот же класс
                     item.innerHTML = `
-                        <div class="patient-link" 
-                             data-appointment-id="${appointment.id}" 
-                             data-type="${appointment.type}">
+                        <div class="patient-link">
                             <h3 class="patient-name">${appointment.type}</h3>
                             <p class="patient-id">Дата: ${new Date(appointment.date).toLocaleDateString()}</p>
                             ${appointment.pdf_path ? 
@@ -68,33 +66,25 @@
                     container.appendChild(item);
                 });
             }
-
-            // Обработчик клика
-            container.addEventListener('click', (e) => {
-                const target = e.target.closest('.patient-link');
-                if (!target) return;
-                
-                const type = target.dataset.type;
-                const appointmentId = target.dataset.appointmentId;
-                let page = '';
-
-                switch (type) {
-                    case 'osmotr': page = 'watch_dogs.html'; break;
-                    case 'vaction': page = 'vaction.html'; break;
-                    case 'privivka': page = 'privivki.html'; break;
-                    default: return;
-                }
-
-                window.location.href = `${page}?appointment_id=${appointmentId}`;
-            });
-
+            
         } catch (error) {
             console.error('Ошибка загрузки:', error);
             document.getElementById('petInfo').textContent = 'Ошибка загрузки данных';
         }
     }
 
-    document.addEventListener('DOMContentLoaded', loadPetData);
+    // Динамическое обновление ссылки
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const petId = urlParams.get('pet_id');
+        const addAppointmentLink = document.getElementById('addAppointmentLink');
+        
+        if (petId) {
+            addAppointmentLink.href = `add_priem.html?pet_id=${petId}`;
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', loadPetData);
 </script>
 </body>
 </html>

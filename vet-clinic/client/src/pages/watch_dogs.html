@@ -3,31 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetLove - Регистрация</title>
+    <title>PetLove - Осмотр</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .dynamic-field { margin-bottom: 15px; }
+        .dynamic-field label { display: block; color: #666; margin-bottom: 5px; }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="login-card">
             <div class="header">
-                <a href="jurnal_pets.html"><button class="back-button"><span><</span></button></a>
-                <img src="img/logo.jpg" alt="" class="logo"></img>
+                <a href="#" class="back-link">
+                    <button class="back-button"><span>&lt;</span></button>
+                </a>
+                <img src="img/logo.jpg" alt="Логотип" class="logo">
             </div>
             <div class="content">
-                <h2 class="first_page_h2">Осмотр</h2>
-                    <div class="readonly-field">
+                <h2 class="first_page_h2">Детали приёма</h2>
+                <div class="readonly-field">
+                    <div class="dynamic-field">
                         <label>ФИО врача:</label>
-                        <div class="field-value">Андрей Сергеевич Васильев</div>
-                        <label>Адрес приема:</label>
-                        <div class="field-value">г.Ярославль, ул.Пешкино, 23Б</div>                        
-                        <label>Дата приема:</label>
-                        <div class="field-value">12.11.2024</div>
-                        <label>Диагностические исследования:</label>
-                        <div class="field-value">...</div>
-                        <label>Лечение:</label>
-                        <div class="field-value">Слабительное</div>
-                    </div> 
-                    <a href="/download.php?id=123" class="Reg_main" download><img src="img/pdf_download.svg" alt="скачать">Скачать</a>          
+                        <div class="field-value" id="vetName">...</div>
+                    </div>
+                    <div class="dynamic-field">
+                        <label>Адрес приёма:</label>
+                        <div class="field-value" id="address">...</div>
+                    </div>
+                    <div class="dynamic-field">
+                        <label>Дата приёма:</label>
+                        <div class="field-value" id="date">...</div>
+                    </div>
+                    <!-- Динамические поля будут здесь -->
+                    <div id="typeSpecificFields"></div>
+                </div>
+                <a href="#" class="Reg_main" download id="pdfLink">
+                    <img src="img/pdf_download.svg" alt="скачать">Скачать документ
+                </a>
             </div>
         </div>
     </div>
@@ -36,49 +48,85 @@
     async function loadAppointment() {
         const urlParams = new URLSearchParams(window.location.search);
         const appointmentId = urlParams.get('appointment_id');
-        
+        const petId = urlParams.get('pet_id');
+
+        // Обновляем ссылку "Назад"
+        document.querySelector('.back-link').href = `jurnal_pacients.html?pet_id=${petId}`;
+
         try {
             const response = await fetch(`http://localhost:5000/api/appointments/${appointmentId}`);
-            if (!response.ok) throw new Error('Прием не найден');
+            if (!response.ok) throw new Error('Приём не найден');
             
             const data = await response.json();
-            
-            // Парсинг details и обработка некорректного формата
-            let details = {};
-            try {
-                details = JSON.parse(data.details);
-                // Если details содержит вложенный details (как в вашем примере)
-                if (details.details) {
-                    details = JSON.parse(details.details);
-                }
-            } catch (e) {
-                console.warn('Ошибка парсинга details:', e);
+            const details = data.details || {};
+
+            // Основные поля
+            document.getElementById('vetName').textContent = data.vet_name || 'Не указано';
+            document.getElementById('address').textContent = data.address || 'Не указано';
+            document.getElementById('date').textContent = 
+                data.date ? new Date(data.date).toLocaleDateString('ru-RU') : 'Дата не указана';
+
+            // Динамические поля
+            const container = document.getElementById('typeSpecificFields');
+            container.innerHTML = '';
+
+            switch(data.type) {
+                case 'osmotr':
+                    container.innerHTML = `
+                        <div class="dynamic-field">
+                            <label>Диагностика:</label>
+                            <div class="field-value">${details.diagnostics || 'Нет данных'}</div>
+                        </div>
+                        <div class="dynamic-field">
+                            <label>Лечение:</label>
+                            <div class="field-value">${details.treatment || 'Нет данных'}</div>
+                        </div>
+                    `;
+                    break;
+                
+                case 'privivka':
+                    container.innerHTML = `
+                        <div class="dynamic-field">
+                            <label>Тип прививки:</label>
+                            <div class="field-value">${details.vaccine_type || 'Нет данных'}</div>
+                        </div>
+                        <div class="dynamic-field">
+                            <label>Рег. номер:</label>
+                            <div class="field-value">${details.reg_number || 'Нет данных'}</div>
+                        </div>
+                    `;
+                    break;
+                
+                case 'vaction':
+                    container.innerHTML = `
+                        <div class="dynamic-field">
+                            <label>Вид вакцины:</label>
+                            <div class="field-value">${details.vaccine_name || 'Нет данных'}</div>
+                        </div>
+                        <div class="dynamic-field">
+                            <label>Номер партии:</label>
+                            <div class="field-value">${details.batch_number || 'Нет данных'}</div>
+                        </div>
+                    `;
+                    break;
             }
 
-            // Заполнение полей с проверкой
-            document.querySelector('.field-value:nth-of-type(1)').textContent = data.vet_name || 'Не указано';
-            document.querySelector('.field-value:nth-of-type(2)').textContent = data.address || 'Не указано';
-            document.querySelector('.field-value:nth-of-type(3)').textContent = 
-                data.date ? new Date(data.date).toLocaleDateString() : 'Дата не указана';
-            document.querySelector('.field-value:nth-of-type(4)').textContent = details.diagnostics || 'Нет данных';
-            document.querySelector('.field-value:nth-of-type(5)').textContent = details.treatment || 'Нет данных';
-            
-            // PDF-ссылка
-            const pdfLink = document.querySelector('.Reg_main');
+            // PDF
+            const pdfLink = document.getElementById('pdfLink');
             if (data.pdf_path) {
                 pdfLink.href = data.pdf_path;
+                pdfLink.style.display = 'flex';
             } else {
                 pdfLink.style.display = 'none';
             }
 
         } catch (error) {
             console.error('Ошибка:', error);
-            alert('Не удалось загрузить данные приема');
+            alert('Не удалось загрузить данные приёма');
         }
     }
 
     window.addEventListener('DOMContentLoaded', loadAppointment);
 </script>
 </body>
-
 </html>
