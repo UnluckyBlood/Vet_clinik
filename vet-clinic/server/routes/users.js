@@ -137,48 +137,52 @@ router.get('/vet/:id', async (req, res) => {
 router.post('/approve-vet/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        // 1. Обновляем статус approved
+        // Обновляем статус approved
         const result = await pool.query(
-            `UPDATE users 
-             SET approved = true 
-             WHERE id = $1 
-             RETURNING id, approved`,
+            `UPDATE users SET approved = true 
+             WHERE id = $1 RETURNING id`,
             [id]
         );
-
-        // 2. Проверяем, что запись обновлена
+        
         if (result.rows.length === 0) {
             return res.status(404).json({ error: "Ветеринар не найден" });
         }
-
-        // 3. Логируем результат
-        console.log("Обновленный ветеринар:", result.rows[0]);
         
-        res.json({ 
-            success: true,
-            data: result.rows[0]
-        });
+        res.json({ success: true });
 
     } catch (err) {
         console.error("Ошибка одобрения:", err);
-        res.status(500).json({ 
-            error: "Ошибка сервера",
-            details: err.message 
-        });
-    }
-});
-
-// Отклонение ветеринара
-router.post('/reject-vet/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        await pool.query("DELETE FROM vet_licenses WHERE user_id = $1", [id]);
-        await pool.query("DELETE FROM users WHERE id = $1", [id]);
-        res.json({ success: true });
-    } catch (err) {
-        console.error("Ошибка удаления:", err);
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
+
+// Отклонение ветеринара (каскадное удаление)
+router.post('/reject-vet/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('BEGIN');
+        
+        // Удаляем лицензию
+        await pool.query(
+            `DELETE FROM vet_licenses WHERE user_id = $1`,
+            [id]
+        );
+        
+        // Удаляем пользователя
+        await pool.query(
+            `DELETE FROM users WHERE id = $1`,
+            [id]
+        );
+        
+        await pool.query('COMMIT');
+        res.json({ success: true });
+
+    } catch (err) {
+        await pool.query('ROLLBACK');
+        console.error("Ошибка отклонения:", err);
+        res.status(500).json({ error: "Ошибка сервера" });
+    }
+});
+
 
 module.exports = router;
