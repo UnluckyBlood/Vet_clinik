@@ -69,7 +69,7 @@
                         </div>
                     </div>
                     <div class="buttons-container">
-                        <a href="jurnal_pets.html"><button type="button" class="First-button secondary">Открыть журнал</button></a>
+                        <a href="jurnal_pacients.html" id="journalLink"><button type="button" class="First-button secondary">Открыть журнал</button></a>
                         <button type="submit" class="First-button">Сохранить</button>
                     </div>
                 </form>
@@ -85,6 +85,9 @@
                 const response = await fetch(`http://localhost:5000/api/pet/${petId}`);
                 if (!response.ok) throw new Error('Ошибка загрузки данных');
                 const pet = await response.json();
+
+                // Обновляем ссылку на журнал
+                document.getElementById('journalLink').href = `jurnal_pacients.html?pet_id=${petId}`;
 
                 // Заполнение данных
                 document.getElementById('petId').textContent = `ID: ${pet.id}`;

@@ -47,7 +47,6 @@
                 const userData = await response.json();
                 
                 document.getElementById('userName').textContent = userData.name;
-                document.querySelector('.first_page_h2').textContent += userData.name;
 
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);

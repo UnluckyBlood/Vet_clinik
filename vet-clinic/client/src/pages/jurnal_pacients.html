@@ -18,32 +18,47 @@
                 <div class="patients-list" id="appointmentsList"></div>
             </div>
             <div class="buttons-container">
-                <a href="add_priem.html" id="addAppointmentLink">
+                <a href="#" id="backButton">
+                    <button type="button" class="First-button tertiary">Назад к питомцам</button>
+                </a>
+                <a href="add_priem.html" id="addAppointmentLink" style="display: none;">
                     <button type="button" class="First-button tertiary">Добавить прием</button>
                 </a>
-                <a href="home_vet.html"><button type="button" class="First-button tertiary">В главное меню</button></a>
             </div>
         </div>
     </div>
 
 <script>
+function setupNavigation() {
+            const userRole = localStorage.getItem('userRole');
+            const backButton = document.getElementById('backButton');
+            
+            if (userRole === 'vet') {
+                backButton.href = 'slayre.html'; // Изменено с pets.html на slayer.html
+            } else if (userRole === 'pet_owner') {
+                backButton.href = 'home_user.html';
+            } else {
+                backButton.href = 'index.html';
+            }
+        }
+
     async function loadPetData() {
         const urlParams = new URLSearchParams(window.location.search);
         const petId = urlParams.get('pet_id');
         
+        setupNavigation();
+
         if (!petId) {
             document.getElementById('petInfo').textContent = '❌ Питомец не выбран';
             return;
         }
 
         try {
-            // Загрузка информации о питомце
             const petResponse = await fetch(`http://localhost:5000/api/pet/${petId}`);
             if (!petResponse.ok) throw new Error('Ошибка загрузки питомца');
             const pet = await petResponse.json();
             document.getElementById('petInfo').textContent = `${pet.name} (ID: ${pet.id})`;
 
-            // Загрузка записей
             const appointmentsResponse = await fetch(`http://localhost:5000/api/appointments/${petId}`);
             if (!appointmentsResponse.ok) throw new Error('Ошибка загрузки записей');
             const appointments = await appointmentsResponse.json();
@@ -54,7 +69,7 @@
             if (Array.isArray(appointments)) {
                 appointments.forEach(appointment => {
                     const item = document.createElement('div');
-                    item.className = 'patient-item'; // Используем тот же класс
+                    item.className = 'patient-item';
                     item.innerHTML = `
                         <div class="patient-link">
                             <h3 class="patient-name">${appointment.type}</h3>
@@ -70,19 +85,15 @@
         } catch (error) {
             console.error('Ошибка загрузки:', error);
             document.getElementById('petInfo').textContent = 'Ошибка загрузки данных';
+        } finally {
+            const userRole = localStorage.getItem('userRole');
+            if (userRole === 'vet') {
+                document.getElementById('addAppointmentLink').style.display = 'inline-block';
+                const petId = urlParams.get('pet_id');
+                document.getElementById('addAppointmentLink').href = `add_priem.html?pet_id=${petId}`;
+            }
         }
     }
-
-    // Динамическое обновление ссылки
-    document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const petId = urlParams.get('pet_id');
-        const addAppointmentLink = document.getElementById('addAppointmentLink');
-        
-        if (petId) {
-            addAppointmentLink.href = `add_priem.html?pet_id=${petId}`;
-        }
-    });
 
     window.addEventListener('DOMContentLoaded', loadPetData);
 </script>
