@@ -390,4 +390,112 @@ router.delete('/vet-patients/:vet_id/:pet_id', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+router.post('/appointments', upload.single('pdf'), async (req, res) => {
+    try {
+        // Преобразование и валидация ID
+        const pet_id = parseInt(req.body.pet_id);
+        const vet_id = parseInt(req.body.vet_id);
+
+        if (isNaN(pet_id) || isNaN(vet_id)) {
+            return res.status(400).json({ error: "Некорректные идентификаторы" });
+        }
+
+        // Проверка существования записей
+        const petCheck = await pool.query('SELECT * FROM pets WHERE id = $1', [pet_id]);
+        const vetCheck = await pool.query('SELECT * FROM users WHERE id = $1 AND role = $2', [vet_id, 'vet']);
+
+        if (petCheck.rows.length === 0 || vetCheck.rows.length === 0) {
+            return res.status(404).json({ error: "Питомец или ветеринар не найдены" });
+        }
+
+        // Формирование данных
+        const { type, address, date, ...details } = req.body;
+        const pdfPath = req.file ? `/uploads/pdf/${req.file.filename}` : null;
+
+        // SQL-запрос
+        const result = await pool.query(
+            `INSERT INTO appointments 
+            (pet_id, vet_id, type, address, date, details, pdf_path) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) 
+            RETURNING *`,
+            [pet_id, vet_id, type, address, date, JSON.stringify(details), pdfPath]
+        );
+
+        res.status(201).json(result.rows[0]);
+
+    } catch (err) {
+        console.error("Ошибка создания записи:", err.message);
+        res.status(500).json({ 
+            error: "Внутренняя ошибка сервера",
+            details: err.message 
+        });
+    }
+});
+// Получение приёмов по pet_id
+router.get('/appointments/:pet_id', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT * FROM appointments 
+             WHERE pet_id = $1 
+             ORDER BY date DESC, created_at DESC`,
+            [req.params.pet_id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+// Получение данных пользователя по ID
+router.get('/user/:id', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT id, name, email, phone, role 
+             FROM users 
+             WHERE id = $1`,
+            [req.params.id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Пользователь не найден" });
+        }
+        
+        res.json(result.rows[0]);
+        
+    } catch (err) {
+        console.error("Ошибка получения данных:", err);
+        res.status(500).json({ error: "Ошибка сервера" });
+    }
+});
+router.get('/pet/:pet_id', async (req, res) => {
+    try {
+        const petId = parseInt(req.params.pet_id);
+        if (isNaN(petId)) return res.status(400).json({ error: "Некорректный ID питомца" });
+
+        const result = await pool.query('SELECT * FROM pets WHERE id = $1', [petId]);
+        if (result.rows.length === 0) return res.status(404).json({ error: "Питомец не найден" });
+        
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Получение записей
+router.get('/appointments/:pet_id', async (req, res) => {
+    try {
+        const petId = parseInt(req.params.pet_id);
+        if (isNaN(petId)) return res.status(400).json({ error: "Некорректный ID питомца" });
+
+        const result = await pool.query(
+            `SELECT * FROM appointments 
+             WHERE pet_id = $1 
+             ORDER BY date DESC`,
+            [petId]
+        );
+        
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 module.exports = router;

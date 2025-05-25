@@ -32,7 +32,53 @@
         </div>
     </div>
 
+<script>
+    async function loadAppointment() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const appointmentId = urlParams.get('appointment_id');
+        
+        try {
+            const response = await fetch(`http://localhost:5000/api/appointments/${appointmentId}`);
+            if (!response.ok) throw new Error('Прием не найден');
+            
+            const data = await response.json();
+            
+            // Парсинг details и обработка некорректного формата
+            let details = {};
+            try {
+                details = JSON.parse(data.details);
+                // Если details содержит вложенный details (как в вашем примере)
+                if (details.details) {
+                    details = JSON.parse(details.details);
+                }
+            } catch (e) {
+                console.warn('Ошибка парсинга details:', e);
+            }
 
+            // Заполнение полей с проверкой
+            document.querySelector('.field-value:nth-of-type(1)').textContent = data.vet_name || 'Не указано';
+            document.querySelector('.field-value:nth-of-type(2)').textContent = data.address || 'Не указано';
+            document.querySelector('.field-value:nth-of-type(3)').textContent = 
+                data.date ? new Date(data.date).toLocaleDateString() : 'Дата не указана';
+            document.querySelector('.field-value:nth-of-type(4)').textContent = details.diagnostics || 'Нет данных';
+            document.querySelector('.field-value:nth-of-type(5)').textContent = details.treatment || 'Нет данных';
+            
+            // PDF-ссылка
+            const pdfLink = document.querySelector('.Reg_main');
+            if (data.pdf_path) {
+                pdfLink.href = data.pdf_path;
+            } else {
+                pdfLink.style.display = 'none';
+            }
+
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Не удалось загрузить данные приема');
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadAppointment);
+</script>
 </body>
 
 </html>

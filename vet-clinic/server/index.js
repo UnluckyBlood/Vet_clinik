@@ -6,6 +6,20 @@ const app = express();
 const upload = require('./config/upload');
 const fs = require('fs');
 
+// Создание папок при запуске
+const createDirectories = () => {
+    const directories = [
+        path.join(__dirname, 'uploads'),
+        path.join(__dirname, 'uploads/pdf')
+    ];
+
+    directories.forEach(dir => {
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+            console.log(`Создана директория: ${dir}`);
+        }
+    });
+};
 // Создаем папки при запуске
 const uploadsDir = path.join(__dirname, 'uploads/pets');
 if (!fs.existsSync(uploadsDir)) {

@@ -10,30 +10,91 @@
     <div class="container">
         <div class="card">
             <div class="header">
-                <img src="img/logo.svg" alt="" class="logo"></img>
-                <h2 class="first_page_h2">Журнал приёмов </h2>
-                <p class="first_page_p"> "Кличка"</p>
+                <img src="img/logo.svg" alt="" class="logo">
+                <h2 class="first_page_h2">Журнал приёмов</h2>
+                <p class="first_page_p" id="petInfo">Загрузка данных...</p>
             </div>
             <div class="content patients-content">
-
-                <div class="patients-list" id="patientsList">
-                    <a href="watch_dogs_vet.html" class="patient-item">
-                        <h3 class="patient-name">Осмотр</h3>
-                    </a>
-                    <a href="privivki_vet.html" class="patient-item">
-                        <h3 class="patient-name">Прививка</h3>
-                    </a>
-                    <a href="vaction_vet.html" class="patient-item">
-                        <h3 class="patient-name">Вакцинация</h3>
-                    </a>
-                </div>
+                <div class="patients-list" id="appointmentsList"></div>
             </div>
             <div class="buttons-container">
-                    <a href="add_priem.html"><button type="button" class="First-button tertiary">Добавить прием</button></a>
-                    <a href="home_vet.html"><button type="button" class="First-button tertiary">В главное меню</button></a>
+                <a href="add_priem.html" id="addAppointmentLink">
+                    <button type="button" class="First-button tertiary">Добавить прием</button>
+                </a>
+                <a href="home_vet.html"><button type="button" class="First-button tertiary">В главное меню</button></a>
             </div>
         </div>
-        
     </div>
+
+<script>
+    async function loadPetData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const petId = urlParams.get('pet_id');
+        
+        if (!petId) {
+            document.getElementById('petInfo').textContent = '❌ Питомец не выбран';
+            return;
+        }
+
+        try {
+            // Загрузка информации о питомце
+            const petResponse = await fetch(`http://localhost:5000/api/pet/${petId}`);
+            if (!petResponse.ok) throw new Error('Ошибка загрузки питомца');
+            const pet = await petResponse.json();
+            document.getElementById('petInfo').textContent = `${pet.name} (ID: ${pet.id})`;
+
+            // Загрузка записей
+            const appointmentsResponse = await fetch(`http://localhost:5000/api/appointments/${petId}`);
+            if (!appointmentsResponse.ok) throw new Error('Ошибка загрузки записей');
+            const appointments = await appointmentsResponse.json();
+
+            const container = document.getElementById('appointmentsList');
+            container.innerHTML = '';
+            
+            if (Array.isArray(appointments)) {
+                appointments.forEach(appointment => {
+                    const item = document.createElement('div');
+                    item.className = 'patient-item';
+                    item.innerHTML = `
+                        <div class="patient-link" 
+                             data-appointment-id="${appointment.id}" 
+                             data-type="${appointment.type}">
+                            <h3 class="patient-name">${appointment.type}</h3>
+                            <p class="patient-id">Дата: ${new Date(appointment.date).toLocaleDateString()}</p>
+                            ${appointment.pdf_path ? 
+                                `<a href="${appointment.pdf_path}" target="_blank" class="pdf-link">PDF документ</a>` : ''}
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            // Обработчик клика
+            container.addEventListener('click', (e) => {
+                const target = e.target.closest('.patient-link');
+                if (!target) return;
+                
+                const type = target.dataset.type;
+                const appointmentId = target.dataset.appointmentId;
+                let page = '';
+
+                switch (type) {
+                    case 'osmotr': page = 'watch_dogs.html'; break;
+                    case 'vaction': page = 'vaction.html'; break;
+                    case 'privivka': page = 'privivki.html'; break;
+                    default: return;
+                }
+
+                window.location.href = `${page}?appointment_id=${appointmentId}`;
+            });
+
+        } catch (error) {
+            console.error('Ошибка загрузки:', error);
+            document.getElementById('petInfo').textContent = 'Ошибка загрузки данных';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPetData);
+</script>
 </body>
 </html>

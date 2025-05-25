@@ -73,7 +73,7 @@
                     </div>
                     
                     <div class="buttons-container">
-                        <a href="jurnal_pacients.html">
+                        <a href="jurnal_pacients.html" id="journalLink">
                             <button type="button" class="First-button secondary">Журнал наблюдений</button>
                         </a>
                     </div>
@@ -115,7 +115,11 @@
                 alert('Не удалось загрузить данные питомца');
             }
         }
-
+        const journalLink = document.getElementById('journalLink');
+        if (journalLink) {
+            const petId = new URLSearchParams(window.location.search).get('pet_id');
+            journalLink.href = `jurnal_pacients.html?pet_id=${petId}`;
+        }
         window.addEventListener('DOMContentLoaded', loadPetData);
     </script>
 </body>
