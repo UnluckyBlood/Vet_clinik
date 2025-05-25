@@ -18,9 +18,10 @@
                 
                 <form id="licenseForm">
                     <div class="checkbox-group">
-                        <label for="fullname">ФИО:</label>
-                        <input type="text" id="fullname" class="input_register" required>
+                        <label for="name">ФИО:</label>
+                        <input type="text" id="name" class="input_register" required>
                     </div>
+
                     <div class="checkbox-group">
                         <label for="emailConfirm">Новая почта:</label>
                         <input type="email" id="emailConfirm" class="input_register" required>
@@ -32,7 +33,7 @@
                     </div>
 
                     <div class="checkbox-group">
-                        <label for="licenseNumber">Номер лицензии:</label>
+                        <label for="licenseNumber">Номер лицензии(при изменении данных потребуется повторная проверка администратором):</label>
                         <input type="text" id="licenseNumber" class="input_register" required>
                     </div>
                     
@@ -52,69 +53,59 @@
         </div>
     </div>
 
-    <script>
+<script>
     let initialLicenseData = {};
     let initialUserData = {};
 
     // Загрузка начальных данных
     async function loadInitialData() {
         const userId = localStorage.getItem('userId');
-        
-        try {
-            // Загрузка данных пользователя
-            const userResponse = await fetch(`http://localhost:5000/api/user/${userId}`);
-            const userData = await userResponse.json();
-            document.getElementById('emailConfirm').value = userData.email;
-            initialUserData = {
-                email: userData.email,
-                name: userData.name
-            };
+        if (!userId) {
+            window.location.href = 'login.html';
+            return;
+        }
 
-            // Загрузка данных лицензии
-            const licenseResponse = await fetch(`http://localhost:5000/api/vet/${userId}`);
+        try {
+            // Параллельная загрузка данных
+            const [userResponse, licenseResponse] = await Promise.all([
+                fetch(`http://localhost:5000/api/user/${userId}`),
+                fetch(`http://localhost:5000/api/vet/${userId}`)
+            ]);
+
+            const userData = await userResponse.json();
             const licenseData = await licenseResponse.json();
-            
-            initialLicenseData = {
-                licenseNumber: licenseData.license_number,
-                issueDate: licenseData.issue_date.split('T')[0],
-                issuedBy: licenseData.issued_by
-            };
 
             // Заполнение полей
-            document.getElementById('fullname').value = userData.name;
-            document.getElementById('licenseNumber').value = initialLicenseData.licenseNumber;
-            document.getElementById('issueDate').value = initialLicenseData.issueDate;
-            document.getElementById('issuedBy').value = initialLicenseData.issuedBy;
+            document.getElementById('name').value = userData.name;
+            document.getElementById('emailConfirm').value = userData.email;
+            document.getElementById('licenseNumber').value = licenseData.license_number;
+            document.getElementById('issueDate').value = licenseData.issue_date.split('T')[0];
+            document.getElementById('issuedBy').value = licenseData.issued_by;
+
+            // Сохранение исходных данных
+            initialUserData = { ...userData };
+            initialLicenseData = { ...licenseData };
 
         } catch (error) {
-            alert('Ошибка загрузки данных');
+            alert('Ошибка загрузки данных: ' + error.message);
         }
     }
 
-    // Проверка изменений в лицензии (только ключевые поля)
+    // Проверка изменений в лицензии
     function checkLicenseChanges() {
-        return document.getElementById('licenseNumber').value !== initialLicenseData.licenseNumber ||
-               document.getElementById('issueDate').value !== initialLicenseData.issueDate ||
-               document.getElementById('issuedBy').value !== initialLicenseData.issuedBy;
+        return (
+            document.getElementById('licenseNumber').value !== initialLicenseData.license_number ||
+            document.getElementById('issueDate').value !== initialLicenseData.issue_date.split('T')[0] ||
+            document.getElementById('issuedBy').value !== initialLicenseData.issued_by
+        );
     }
 
     // Обработчик отправки формы
     document.getElementById('licenseForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const licenseChanged = checkLicenseChanges();
-        const nameChanged = document.getElementById('fullname').value !== initialUserData.name;
-        const emailChanged = document.getElementById('emailConfirm').value !== initialUserData.email;
-        const passwordChanged = document.getElementById('password').value.trim().length > 0;
-
-        // Требовать подтверждение только для изменений лицензии
-        if (licenseChanged) {
-            const confirmChange = confirm('Изменение данных лицензии потребует повторной проверки! Вы будете разлогинены.');
-            if (!confirmChange) return;
-        }
-
         const formData = {
-            name: document.getElementById('fullname').value.trim(),
+            name: document.getElementById('name').value.trim(),
             email: document.getElementById('emailConfirm').value.trim(),
             password: document.getElementById('password').value.trim() || undefined,
             licenseData: {
@@ -122,7 +113,7 @@
                 issueDate: document.getElementById('issueDate').value,
                 issuedBy: document.getElementById('issuedBy').value.trim()
             },
-            licenseChanged: licenseChanged
+            licenseChanged: checkLicenseChanges()
         };
 
         try {
@@ -133,34 +124,27 @@
             });
 
             const result = await response.json();
+            
             if (!response.ok) throw new Error(result.error || 'Ошибка обновления');
 
-            if (licenseChanged) {
+            if (formData.licenseChanged) {
                 alert('Данные лицензии отправлены на проверку!');
                 localStorage.clear();
                 window.location.href = 'login.html';
             } else {
-                if (emailChanged) localStorage.setItem('userEmail', formData.email);
+                // Точечное обновление данных без перезагрузки
+                initialUserData.name = formData.name;
+                initialUserData.email = formData.email;
                 alert('Данные успешно обновлены!');
-                window.location.reload();
             }
+
         } catch (error) {
-            alert(error.message);
+            alert('Ошибка: ' + error.message);
         }
     });
 
     // Инициализация
-    window.addEventListener('DOMContentLoaded', () => {
-        loadInitialData();
-        
-        // Динамическое предупреждение для лицензии
-        ['licenseNumber', 'issueDate', 'issuedBy'].forEach(id => {
-            document.getElementById(id).addEventListener('input', () => {
-                document.getElementById('licenseChangeWarning').style.display = 
-                    checkLicenseChanges() ? 'block' : 'none';
-            });
-        });
-    });
-    </script>
+    window.addEventListener('DOMContentLoaded', loadInitialData);
+</script>
 </body>
 </html>

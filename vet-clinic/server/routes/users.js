@@ -29,11 +29,10 @@ router.post('/register', async (req, res) => {
         if (role === 'vet' && licenseData) {
             await pool.query(
                 `INSERT INTO vet_licenses 
-                (user_id, fullname, license_number, issue_date, issued_by) 
-                VALUES ($1, $2, $3, $4, $5)`,
+                (user_id, license_number, issue_date, issued_by) 
+                VALUES ($1, $2, $3, $4)`,
                 [
                     userResult.rows[0].id,
-                    licenseData.fullname,
                     licenseData.licenseNumber,
                     licenseData.issueDate,
                     licenseData.issuedBy
@@ -43,9 +42,6 @@ router.post('/register', async (req, res) => {
 
         // Для владельцев
         if (role === 'pet_owner' && petData) {
-            if (!petData.petName || !petData.petAge || !petData.petBreed || !petData.petGender || !petData.petType) {
-                throw new Error("Не все данные питомца заполнены");
-            }
             await pool.query(
                 `INSERT INTO pets 
                 (owner_id, name, age, breed, gender, type) 
@@ -103,7 +99,7 @@ router.get('/unapproved-vets', async (req, res) => {
     try {
         const result = await pool.query(
             `SELECT u.id, u.name, u.email, u.phone, 
-                    v.fullname, v.license_number, v.issue_date, v.issued_by 
+                    v.license_number, v.issue_date, v.issued_by 
              FROM users u
              INNER JOIN vet_licenses v ON u.id = v.user_id
              WHERE u.role = 'vet' AND u.approved = false`
@@ -121,7 +117,7 @@ router.get('/vet/:id', async (req, res) => {
     try {
         const result = await pool.query(
             `SELECT u.id, u.name, u.email, u.phone, 
-                    v.fullname, v.license_number, v.issue_date, v.issued_by 
+                    v.license_number, v.issue_date, v.issued_by 
              FROM users u
              INNER JOIN vet_licenses v ON u.id = v.user_id
              WHERE u.id = $1`,
@@ -134,10 +130,10 @@ router.get('/vet/:id', async (req, res) => {
     }
 });
 
+// Одобрение ветеринара
 router.post('/approve-vet/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        // Обновляем статус approved
         const result = await pool.query(
             `UPDATE users SET approved = true 
              WHERE id = $1 RETURNING id`,
@@ -149,78 +145,51 @@ router.post('/approve-vet/:id', async (req, res) => {
         }
         
         res.json({ success: true });
-
     } catch (err) {
         console.error("Ошибка одобрения:", err);
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
 
-// Отклонение ветеринара (каскадное удаление)
+// Отклонение ветеринара
 router.post('/reject-vet/:id', async (req, res) => {
     const { id } = req.params;
     try {
         await pool.query('BEGIN');
-        
-        // Удаляем лицензию
-        await pool.query(
-            `DELETE FROM vet_licenses WHERE user_id = $1`,
-            [id]
-        );
-        
-        // Удаляем пользователя
-        await pool.query(
-            `DELETE FROM users WHERE id = $1`,
-            [id]
-        );
-        
+        await pool.query(`DELETE FROM vet_licenses WHERE user_id = $1`, [id]);
+        await pool.query(`DELETE FROM users WHERE id = $1`, [id]);
         await pool.query('COMMIT');
         res.json({ success: true });
-
     } catch (err) {
         await pool.query('ROLLBACK');
         console.error("Ошибка отклонения:", err);
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
-// Эндпоинт для получения данных пользователя с валидацией ID
+
+// Получение данных пользователя
 router.get('/user/:id', async (req, res) => {
     const { id } = req.params;
-    
-    // Проверяем, что ID является числом
-    if (isNaN(id)) {
-        return res.status(400).json({ error: "Некорректный ID пользователя" });
-    }
-
     try {
         const result = await pool.query(
             `SELECT id, name, email, phone, role 
              FROM users 
              WHERE id = $1`,
-            [parseInt(id)] // Явное преобразование к числу
+            [id]
         );
-        
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: "Пользователь не найден" });
-        }
-
         res.json(result.rows[0]);
     } catch (err) {
         console.error("Ошибка получения данных:", err);
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
+
+// Обновление данных пользователя
 router.put('/update-user/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, email, phone, licenseData } = req.body;
-
-    // Проверка ID
-    if (isNaN(id)) {
-        return res.status(400).json({ error: "Некорректный ID пользователя" });
-    }
+    const { name, email, phone } = req.body;
 
     try {
-        // Проверка уникальности email (исключая текущего пользователя)
         const emailCheck = await pool.query(
             "SELECT * FROM users WHERE email = $1 AND id != $2",
             [email, id]
@@ -229,7 +198,6 @@ router.put('/update-user/:id', async (req, res) => {
             return res.status(400).json({ error: "Email уже используется" });
         }
 
-        // Обновление данных пользователя
         const userResult = await pool.query(
             `UPDATE users 
              SET name = $1, email = $2, phone = $3 
@@ -238,77 +206,45 @@ router.put('/update-user/:id', async (req, res) => {
             [name, email, phone, id]
         );
 
-        // Если пользователь - ветеринар и есть данные лицензии
-        if (licenseData) {
-            await pool.query(
-                `UPDATE vet_licenses 
-                 SET fullname = $1, license_number = $2, issue_date = $3, issued_by = $4 
-                 WHERE user_id = $5`,
-                [
-                    licenseData.fullname,
-                    licenseData.licenseNumber,
-                    licenseData.issueDate,
-                    licenseData.issuedBy,
-                    id
-                ]
-            );
-        }
-
-        res.json({ 
-            success: true,
-            user: userResult.rows[0]
-        });
-
+        res.json({ success: true, user: userResult.rows[0] });
     } catch (err) {
         console.error("Ошибка обновления:", err);
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
+
 router.put('/update-vet/:id', async (req, res) => {
     const { id } = req.params;
     const { name, email, password, licenseData, licenseChanged } = req.body;
 
     try {
-        // Валидация
-        if (isNaN(id)) return res.status(400).json({ error: "Неверный ID" });
-
-        // Проверка email
-        if (email) {
-            const emailCheck = await pool.query(
-                "SELECT * FROM users WHERE email = $1 AND id != $2",
-                [email, id]
-            );
-            if (emailCheck.rows.length > 0) {
-                return res.status(400).json({ error: "Email уже используется" });
-            }
-        }
-
         await pool.query('BEGIN');
-
-        // Обновление данных пользователя
-        const userUpdates = [];
-        if (name) userUpdates.push(pool.query(`UPDATE users SET name = $1 WHERE id = $2`, [name, id]));
-        if (email) userUpdates.push(pool.query(`UPDATE users SET email = $1 WHERE id = $2`, [email, id]));
-        if (password) userUpdates.push(pool.query(`UPDATE users SET password = $1 WHERE id = $2`, [password, id]));
         
+        // Обновление пользователя
+        await pool.query(`
+            UPDATE users SET 
+                name = COALESCE($1, name),
+                email = COALESCE($2, email),
+                password = COALESCE($3, password)
+            WHERE id = $4
+        `, [name, email, password, id]);
+
         // Обновление лицензии
         if (licenseData) {
-            await pool.query(
-                `UPDATE vet_licenses SET
-                    license_number = $1,
-                    issue_date = $2,
-                    issued_by = $3
-                WHERE user_id = $4`,
-                [licenseData.licenseNumber, licenseData.issueDate, licenseData.issuedBy, id]
-            );
-
-            // Сброс approved только при изменении лицензии
-            if (licenseChanged) {
-                await pool.query(`UPDATE users SET approved = false WHERE id = $1`, [id]);
-            }
+            await pool.query(`
+                UPDATE vet_licenses SET
+                    license_number = COALESCE($1, license_number),
+                    issue_date = COALESCE($2, issue_date),
+                    issued_by = COALESCE($3, issued_by)
+                WHERE user_id = $4
+            `, [licenseData.licenseNumber, licenseData.issueDate, licenseData.issuedBy, id]);
         }
 
-        await Promise.all(userUpdates);
+        // Сброс approved при изменении лицензии
+        if (licenseChanged) {
+            await pool.query(`UPDATE users SET approved = false WHERE id = $1`, [id]);
+        }
+
         await pool.query('COMMIT');
         res.json({ success: true });
 
@@ -318,4 +254,5 @@ router.put('/update-vet/:id', async (req, res) => {
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
+
 module.exports = router;

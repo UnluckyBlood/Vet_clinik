@@ -11,7 +11,7 @@
         <div class="login-card">
             <div class="header">
                 <a href="home_user.html"><button class="back-button"><span><</span></button></a>
-                <img src="img/logo.jpg" alt="" class="logo"></img>
+                <img src="img/logo.jpg" alt="" class="logo">
             </div>
             <div class="content">
                 <h2>Мой профиль</h2>
@@ -37,89 +37,65 @@
         </div>
     </div>
 
-<script>
-    // Загрузка данных пользователя и лицензии (для ветеринаров)
-    async function loadUserData() {
-        const userId = localStorage.getItem('userId');
-        
-        try {
-            // Загрузка основных данных
-            const userResponse = await fetch(`http://localhost:5000/api/user/${userId}`);
-            const userData = await userResponse.json();
-
-            document.getElementById('name').value = userData.name;
-            document.getElementById('email').value = userData.email;
-            document.getElementById('phone').value = userData.phone;
-
-            // Если пользователь - ветеринар, загружаем лицензию
-            if (userData.role === 'vet') {
-                const licenseResponse = await fetch(`http://localhost:5000/api/vet/${userId}`);
-                const licenseData = await licenseResponse.json();
-
-                document.getElementById('fullname').value = licenseData.fullname;
-                document.getElementById('licenseNumber').value = licenseData.license_number;
-                document.getElementById('issueDate').value = licenseData.issue_date;
-                document.getElementById('issuedBy').value = licenseData.issued_by;
+    <script>
+                document.getElementById('phone').addEventListener('input', function(e) {
+            const x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+            e.target.value = !x[2] ? '+7' : `+7 (${x[2]}${x[3] ? `) ${x[3]}` : ''}${x[4] ? `-${x[4]}` : ''}${x[5] ? `-${x[5]}` : ''}`;
+        });
+        // Загрузка данных пользователя
+        async function loadUserData() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                window.location.href = 'login.html';
+                return;
             }
 
-        } catch (error) {
-            alert('Ошибка загрузки данных');
+            try {
+                const response = await fetch(`http://localhost:5000/api/user/${userId}`);
+                const userData = await response.json();
+
+                // Заполнение полей
+                document.getElementById('name').value = userData.name;
+                document.getElementById('email').value = userData.email;
+                document.getElementById('phone').value = userData.phone;
+
+            } catch (error) {
+                alert('Ошибка загрузки данных: ' + error.message);
+            }
         }
-    }
 
-    // Отправка обновленных данных
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const userId = localStorage.getItem('userId');
-
-        const updatedData = {
-            name: document.getElementById('name').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.replace(/\D/g, '')
-        };
-
-        // Если ветеринар, добавляем данные лицензии
-        const role = localStorage.getItem('userRole'); // Предполагаем, что роль сохранена при входе
-        if (role === 'vet') {
-            updatedData.licenseData = {
-                fullname: document.getElementById('fullname').value.trim(),
-                licenseNumber: document.getElementById('licenseNumber').value.trim(),
-                issueDate: document.getElementById('issueDate').value,
-                issuedBy: document.getElementById('issuedBy').value.trim()
+        // Обработчик отправки формы
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.replace(/\D/g, '')
             };
-        }
 
-        // Валидация телефона
-        if (updatedData.phone.length !== 11) {
-            alert('Телефон должен содержать 11 цифр');
-            return;
-        }
+            try {
+                const response = await fetch(`http://localhost:5000/api/update-user/${localStorage.getItem('userId')}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
 
-        try {
-            const response = await fetch(`http://localhost:5000/api/update-user/${userId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedData)
-            });
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Ошибка обновления');
+                }
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Ошибка обновления");
+                alert('Данные успешно обновлены!');
+                window.location.reload();
+
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
             }
+        });
 
-            alert('Данные успешно обновлены!');
-            window.location.reload();
-
-        } catch (error) {
-            alert(error.message);
-        }
-    });
-
-    // Инициализация
-    window.addEventListener('DOMContentLoaded', () => {
-        loadUserData();
-        // Маска для телефона (код из предыдущего примера)
-    });
-</script>
+        // Инициализация
+        window.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
 </body>
 </html>
