@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-
+const upload = require('../config/upload');
 // Регистрация
 router.post('/register', async (req, res) => {
     const { name, email, phone, role, password, petData, licenseData } = req.body;
@@ -254,5 +254,84 @@ router.put('/update-vet/:id', async (req, res) => {
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
+router.post('/add-pet', upload.single('photo'), async (req, res) => {
+    const { owner_id, name, age, breed, gender, type } = req.body;
+    const photo = req.file ? `/uploads/pets/${req.file.filename}` : 'default.jpg';
 
+    try {
+        const result = await pool.query(
+            `INSERT INTO pets 
+            (owner_id, name, age, breed, gender, type, photo_url) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) 
+            RETURNING *`,
+            [owner_id, name, age, breed, gender, type, photo]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Получение всех питомцев пользователя
+router.get('/pets/:owner_id', async (req, res) => {
+    try {
+        console.log('Fetching pets for owner:', req.params.owner_id);
+        const result = await pool.query(
+            `SELECT id, name, photo_url, age, breed 
+             FROM pets WHERE owner_id = $1`,
+            [req.params.owner_id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Получение данных конкретного питомца
+router.get('/pet/:pet_id', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT * FROM pets WHERE id = $1`,
+            [req.params.pet_id]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+router.put('/pet/:pet_id', upload.single('photo'), async (req, res) => {
+    const { pet_id } = req.params;
+    const { name, breed, gender, age, passport } = req.body;
+    
+    try {
+        let photo_url;
+        if (req.file) {
+            photo_url = `/uploads/pets/${req.file.filename}`;
+        } else {
+            // Сохраняем существующее фото
+            const currentPhoto = await pool.query(
+                'SELECT photo_url FROM pets WHERE id = $1', 
+                [pet_id]
+            );
+            photo_url = currentPhoto.rows[0].photo_url;
+        }
+
+        await pool.query(
+            `UPDATE pets SET 
+                name = COALESCE($1, name),
+                breed = COALESCE($2, breed),
+                gender = COALESCE($3, gender),
+                age = COALESCE($4, age),
+                passport = COALESCE($5, passport),
+                photo_url = COALESCE($6, photo_url)
+             WHERE id = $7`,
+            [name, breed, gender, age, passport, photo_url, pet_id]
+        );
+        
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Ошибка обновления:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
 module.exports = router;

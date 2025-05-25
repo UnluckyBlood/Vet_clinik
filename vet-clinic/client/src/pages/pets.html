@@ -11,14 +11,14 @@
         <div class="card">
             <div class="header">
                 <a href="animals_user.html"><button class="back-button"><span><</span></button></a>
-                <img src="img/logo.svg" alt="" class="logo"></img>
+                <img src="img/logo.svg" alt="Логотип" class="logo">
             </div>
             <div class="content">
-                <h2>{Кличка}</h2>
+                <h2 id="petName">{Кличка}</h2>
                 <form id="register">
                     <div class="readonly-field">
                         <label>Уникальный идентификатор:</label>
-                        <div class="field-value">{ID:421872419442197}</div>
+                        <div class="field-value" id="petId"></div>
                         <div class="field-note">*Скажите уникальный идентификатор своего питомца врачу на приеме</div>
                     </div>
                     <div class="form-split">
@@ -29,14 +29,15 @@
                             <label for="breed">Порода:</label>
                             <input class="input_register" type="text" id="breed" placeholder="Введите породу" required>
                             
-                            
-                         </div>   
+                            <label for="passport">Паспорт:</label>
+                            <input class="input_register" type="text" id="passport" placeholder="Номер паспорта" required>
+                        </div>   
                         <div class="form-right">
                             <div class="profile-nav_add_picture">
                                 <input type="file" id="fileInput" accept="image/*" style="display: none;">
                                 <label for="fileInput" class="nav-button photo-placeholder">
                                     <div class="photo-wrapper">
-                                        <button id="resetPhotoBtn" class="reset-btn" title="Удалить фото">×</button>
+                                        <button id="resetPhotoBtn" class="reset-btn" onclick="resetPhoto()">×</button>
                                         <div class="photo-container">
                                             <img id="photoPreview" class="photo-preview" alt="Превью фото">
                                             <img id="photoIcon" src="../img/photo_add.svg" alt="Добавить фотографию">
@@ -48,124 +49,118 @@
                         </div>
                     </div>
                     <div class="two-in-row">
-                                <div class="half-width">
-                                    <label for="petGender">Пол:</label>
-                                    <select id="petGender" class="input_register" required>
-                                        <option value="" disabled selected>Выберите пол</option>
-                                        <option value="male">Мужской</option>
-                                        <option value="female">Женский</option>
-                                    </select>
-                                </div>
-                                    <div class="half-width">
-                                            <label for="age">Возраст:</label>
-                                            <select id="petAge" class="input_register_fix" required>
-                                            <option value="" disabled selected>Выберите возраст</option>
-                                            <option value="1">До 1 года</option>
-                                            <option value="2">1-3 года</option>
-                                            <option value="3">3-5 лет</option>
-                                            <option value="4">5+ лет</option>
-                                        </select>
-                                    </div>
-                                </div>
-                    
-                            
-                    <label for="passport">Паспорт:</label>
-                    <input class="input_register" type="text" id="passport" placeholder="Номер паспорта">
+                        <div class="half-width">
+                            <label for="petGender">Пол:</label>
+                            <select id="petGender" class="input_register" required>
+                                <option value="" disabled selected>Выберите пол</option>
+                                <option value="male">Мужской</option>
+                                <option value="female">Женский</option>
+                            </select>
+                        </div>
+                        <div class="half-width">
+                            <label for="age">Возраст:</label>
+                            <select id="petAge" class="input_register_fix" required>
+                                <option value="" disabled selected>Выберите возраст</option>
+                                <option value="1">До 1 года</option>
+                                <option value="2">1-3 года</option>
+                                <option value="3">3-5 лет</option>
+                                <option value="4">5+ лет</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="buttons-container">
                         <a href="jurnal_pets.html"><button type="button" class="First-button secondary">Открыть журнал</button></a>
-                        <button type="submit" class="First-button">Редактировать</button>
-                    
+                        <button type="submit" class="First-button">Сохранить</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
     <script>
-      // Обработчик сброса фото
-    document.getElementById('resetPhotoBtn').addEventListener('click', function(e) {
-        e.stopPropagation(); // Предотвращаем открытие файлового диалога
-        
-        // Сбрасываем значение input file
-        document.getElementById('fileInput').value = '';
-        
-        // Скрываем превью и показываем иконку
-        document.getElementById('photoPreview').style.display = 'none';
-        document.getElementById('photoIcon').style.display = 'block';
-        
-        // Скрываем кнопку сброса
-        this.style.display = 'none';
-        
-        // Удаляем фото из localStorage
-        localStorage.removeItem('petPhoto');
-    });
+        async function loadPetData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const petId = urlParams.get('pet_id');
 
-    // Модифицируем обработчик загрузки фото, чтобы показывать кнопку сброса
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(event) {
-                const preview = document.getElementById('photoPreview');
-                const icon = document.getElementById('photoIcon');
-                const resetBtn = document.getElementById('resetPhotoBtn');
-                
-                preview.src = event.target.result;
-                preview.style.display = 'block';
-                icon.style.display = 'none';
-                resetBtn.style.display = 'block';
-                
-                localStorage.setItem('petPhoto', event.target.result);
-            };
-            
-            reader.readAsDataURL(file);
+            try {
+                const response = await fetch(`http://localhost:5000/api/pet/${petId}`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных');
+                const pet = await response.json();
+
+                // Заполнение данных
+                document.getElementById('petId').textContent = `ID: ${pet.id}`;
+                document.getElementById('petName').textContent = pet.name;
+                document.getElementById('name').value = pet.name;
+                document.getElementById('breed').value = pet.breed;
+                document.getElementById('petGender').value = pet.gender;
+                document.getElementById('petAge').value = pet.age;
+                document.getElementById('passport').value = pet.passport || '';
+
+                // Загрузка фото
+                const photoPreview = document.getElementById('photoPreview');
+                if (pet.photo_url) {
+                    photoPreview.src = pet.photo_url;
+                    photoPreview.style.display = 'block';
+                    document.getElementById('photoIcon').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось загрузить данные питомца');
+            }
         }
-    });
 
-    // При загрузке страницы также показываем кнопку сброса, если есть фото
-    window.addEventListener('DOMContentLoaded', function() {
-        const savedPhoto = localStorage.getItem('petPhoto');
-        if (savedPhoto) {
-            const preview = document.getElementById('photoPreview');
-            const icon = document.getElementById('photoIcon');
-            const resetBtn = document.getElementById('resetPhotoBtn');
-            
-            preview.src = savedPhoto;
-            preview.style.display = 'block';
-            icon.style.display = 'none';
-            resetBtn.style.display = 'block';
-        }
-    });
-
-    document.getElementById('register').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const requiredFields = [
-            { id: 'name', name: 'Кличка' },
-            { id: 'breed', name: 'Порода' },
-            { id: 'gender', name: 'Пол' },
-            { id: 'age', name: 'Возраст' }
-        ];
-        
-        let isValid = true;
-        document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-        document.querySelectorAll('.error-message').forEach(el => el.remove());
-        
-        requiredFields.forEach(field => {
-            const element = document.getElementById(field.id);
-            if (!element.value.trim()) {
-                element.classList.add('error');
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'error-message';
-                errorMsg.textContent = `Поле "${field.name}" обязательно`;
-                element.parentNode.appendChild(errorMsg);
-                isValid = false;
+        // Обработка загрузки фото
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('photoPreview').src = e.target.result;
+                    document.getElementById('photoPreview').style.display = 'block';
+                    document.getElementById('photoIcon').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
             }
         });
-        
-        if (isValid) {
-            // Здесь будет код для сохранения данных
-            alert('Данные сохранены!');
+
+        // Сброс фото
+        function resetPhoto() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('photoPreview').src = '';
+            document.getElementById('photoPreview').style.display = 'none';
+            document.getElementById('photoIcon').style.display = 'block';
         }
-    });
+
+        // Отправка формы
+        document.getElementById('register').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const petId = new URLSearchParams(window.location.search).get('pet_id');
+            const formData = new FormData();
+
+            const file = document.getElementById('fileInput').files[0];
+            if (file) formData.append('photo', file);
+
+            formData.append('name', document.getElementById('name').value);
+            formData.append('breed', document.getElementById('breed').value);
+            formData.append('gender', document.getElementById('petGender').value);
+            formData.append('age', document.getElementById('petAge').value);
+            formData.append('passport', document.getElementById('passport').value);
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/pet/${petId}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Ошибка сохранения');
+                alert('Данные обновлены!');
+                window.location.reload();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось сохранить изменения');
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', loadPetData);
     </script>
 </body>
 </html>

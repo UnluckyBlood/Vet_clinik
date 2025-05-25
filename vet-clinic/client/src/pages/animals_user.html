@@ -1,4 +1,3 @@
-<!-- Главная страница после регистрации или входа - обычного пользователя -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -12,23 +11,58 @@
         <div class="card">
             <div class="header">
                 <a href="home_user.html"><button class="back-button"><span><</span></button></a>
-                <img src="img/logo.svg" alt="" class="logo"></img>
+                <img src="img/logo.svg" alt="Логотип" class="logo">
                 <h2 class="first_page_h2">Мои питомцы</h2>
-
             </div>
+            
             <div class="profile-nav">
+                <!-- Кнопка "Добавить" (статическая) -->
                 <a href="pets_add.html" class="nav-button">
                     <img src="../img/plus.svg" alt="Добавить">
                     <span>Добавить</span>
                 </a>
                 
-                <a href="pets.html" class="nav-button">
-                    <img src="../img/tiger.png" alt="Питомцы">
-                    <span>{Кличка}</span>
-                </a>
+                <!-- Контейнер ТОЛЬКО для карточек питомцев -->
+                <div id="petsList" class="pets-container"></div>
             </div>
         </div>
-        
     </div>
+
+    <script>
+    async function loadPets() {
+    try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const response = await fetch(`http://localhost:5000/api/pets/${userId}`);
+        if (!response.ok) throw new Error('Ошибка загрузки');
+        
+        const pets = await response.json();
+        const container = document.getElementById('petsList'); // Работаем только с petsList
+        container.innerHTML = ''; // Очищаем только карточки
+
+        pets.forEach(pet => {
+            const card = document.createElement('a');
+            card.className = 'nav-button';
+            card.href = `pets.html?pet_id=${pet.id}`;
+            card.innerHTML = `
+                <img src="${pet.photo_url}" 
+                     alt="${pet.name}"
+                     onerror="this.src='img/default.jpg'">
+                <span>${pet.name}</span>
+            `;
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Не удалось загрузить питомцев');
+    }
+}
+    window.addEventListener('DOMContentLoaded', loadPets);
+    </script>
 </body>
 </html>
