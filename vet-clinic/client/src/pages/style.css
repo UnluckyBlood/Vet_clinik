@@ -759,6 +759,7 @@ label.secondary{
 .notification.error {
     background: #f44336;
 }
+
 @media (max-width: 768px) {
     .card, .login-card {
         width: 85vw;
