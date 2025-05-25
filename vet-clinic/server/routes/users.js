@@ -266,13 +266,13 @@ router.put('/update-user/:id', async (req, res) => {
 });
 router.put('/update-vet/:id', async (req, res) => {
     const { id } = req.params;
-    const { email, password, licenseData, licenseChanged } = req.body;
+    const { name, email, password, licenseData, licenseChanged } = req.body;
 
     try {
-        // Валидация ID
+        // Валидация
         if (isNaN(id)) return res.status(400).json({ error: "Неверный ID" });
 
-        // Проверка уникальности email
+        // Проверка email
         if (email) {
             const emailCheck = await pool.query(
                 "SELECT * FROM users WHERE email = $1 AND id != $2",
@@ -283,65 +283,39 @@ router.put('/update-vet/:id', async (req, res) => {
             }
         }
 
-        // Транзакция для комплексного обновления
         await pool.query('BEGIN');
 
-        // Обновление основных данных
-        if (email || password) {
-            let query = 'UPDATE users SET ';
-            const params = [];
-            let counter = 1;
-
-            if (email) {
-                query += `email = $${counter++}, `;
-                params.push(email);
-            }
-            if (password) {
-                query += `password = $${counter++}, `;
-                params.push(password);
-            }
-
-            query = query.slice(0, -2) + ` WHERE id = $${counter}`;
-            params.push(id);
-            
-            await pool.query(query, params);
-        }
-
+        // Обновление данных пользователя
+        const userUpdates = [];
+        if (name) userUpdates.push(pool.query(`UPDATE users SET name = $1 WHERE id = $2`, [name, id]));
+        if (email) userUpdates.push(pool.query(`UPDATE users SET email = $1 WHERE id = $2`, [email, id]));
+        if (password) userUpdates.push(pool.query(`UPDATE users SET password = $1 WHERE id = $2`, [password, id]));
+        
         // Обновление лицензии
         if (licenseData) {
             await pool.query(
                 `UPDATE vet_licenses SET
-                    fullname = $1,
-                    license_number = $2,
-                    issue_date = $3,
-                    issued_by = $4
-                WHERE user_id = $5`,
-                [
-                    licenseData.fullname,
-                    licenseData.licenseNumber,
-                    licenseData.issueDate,
-                    licenseData.issuedBy,
-                    id
-                ]
+                    license_number = $1,
+                    issue_date = $2,
+                    issued_by = $3
+                WHERE user_id = $4`,
+                [licenseData.licenseNumber, licenseData.issueDate, licenseData.issuedBy, id]
             );
 
-            // Сброс approved при изменении лицензии
+            // Сброс approved только при изменении лицензии
             if (licenseChanged) {
-                await pool.query(
-                    `UPDATE users SET approved = false WHERE id = $1`,
-                    [id]
-                );
+                await pool.query(`UPDATE users SET approved = false WHERE id = $1`, [id]);
             }
         }
 
+        await Promise.all(userUpdates);
         await pool.query('COMMIT');
         res.json({ success: true });
 
     } catch (err) {
         await pool.query('ROLLBACK');
-        console.error("Ошибка обновления ветеринара:", err);
+        console.error("Ошибка обновления:", err);
         res.status(500).json({ error: "Ошибка сервера" });
     }
 });
-
 module.exports = router;

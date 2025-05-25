@@ -11,8 +11,8 @@
         <div class="card">
             <div class="header">
                 <img src="img/logo.svg" alt="" class="logo"></img>
-                <h2 class="first_page_h2">Добро пожаловать, </h2>
-                <p class="first_page_p"> имя из бд </p>
+                <h2 class="first_page_h2">Добро пожаловать, </h2>     
+                <span id="vetName" class="first_page_p"></span>
             </div>
             <div class="profile-nav">
                 <a href="profile_vet.html" class="nav-button">
@@ -37,5 +37,26 @@
         </div>
         
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const userId = localStorage.getItem('userId');
+        
+        if (!userId) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/user/${userId}`);
+            const userData = await response.json();
+            
+            document.getElementById('vetName').textContent = userData.name;
+
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+            alert('Не удалось загрузить данные ветеринара');
+        }
+    });
+</script>
 </body>
 </html>
