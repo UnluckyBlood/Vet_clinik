@@ -95,7 +95,7 @@
             
             patients.forEach(patient => {
                 const name = patient.querySelector('.patient-name').textContent.toLowerCase();
-                patient.style.display = name.includes(searchTerm) ? 'flex' : 'none';
+                patient.style.display = name.includes(searchTerm) ? '' : 'none';
             });
         });
 
